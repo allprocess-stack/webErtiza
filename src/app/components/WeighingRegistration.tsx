@@ -59,11 +59,10 @@ export function WeighingRegistration() {
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => setWeighingType("first")}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              weighingType === "first"
-                ? "border-blue-600 bg-blue-50 text-blue-700"
-                : "border-slate-300 hover:border-slate-400"
-            }`}
+            className={`p-4 rounded-lg border-2 transition-colors ${weighingType === "first"
+              ? "border-blue-600 bg-blue-50 text-blue-700"
+              : "border-slate-300 hover:border-slate-400"
+              }`}
           >
             <Scale className="w-8 h-8 mx-auto mb-2" />
             <p className="font-semibold">Primera Pesada</p>
@@ -71,11 +70,10 @@ export function WeighingRegistration() {
           </button>
           <button
             onClick={() => setWeighingType("second")}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              weighingType === "second"
-                ? "border-green-600 bg-green-50 text-green-700"
-                : "border-slate-300 hover:border-slate-400"
-            }`}
+            className={`p-4 rounded-lg border-2 transition-colors ${weighingType === "second"
+              ? "border-green-600 bg-green-50 text-green-700"
+              : "border-slate-300 hover:border-slate-400"
+              }`}
           >
             <ArrowRight className="w-8 h-8 mx-auto mb-2" />
             <p className="font-semibold">Segunda Pesada</p>
@@ -150,10 +148,10 @@ export function WeighingRegistration() {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Seleccionar producto</option>
-              <option value="cemento">Cemento</option>
+              {/* <option value="cemento">Cemento</option>
               <option value="arena">Arena</option>
               <option value="grava">Grava</option>
-              <option value="piedra">Piedra</option>
+              <option value="piedra">Piedra</option> */}
             </select>
           </div>
 
@@ -169,14 +167,14 @@ export function WeighingRegistration() {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Seleccionar cliente</option>
-              <option value="empresa1">Empresa ABC S.A.C.</option>
+              {/* <option value="empresa1">Empresa ABC S.A.C.</option>
               <option value="empresa2">Constructora XYZ</option>
-              <option value="empresa3">Proveedor DEF</option>
+              <option value="empresa3">Proveedor DEF</option> */}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2 items-center gap-2">
               <Calendar className="w-4 h-4" />
               Fecha y Hora
             </label>

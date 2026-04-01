@@ -132,24 +132,24 @@ export function History() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="flex md:flex-row gap-4 text-center">
+        <div className="flex-2 bg-white rounded-xl shadow-sm p-6 ">
           <p className="text-slate-500 text-sm mb-1">Total Mediciones</p>
           <p className="text-3xl font-bold text-slate-800">{historyData.length}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        {/* <div className="bg-white rounded-xl shadow-sm p-6">
           <p className="text-slate-500 text-sm mb-1">Peso Total</p>
           <p className="text-3xl font-bold text-slate-800">
             {historyData.reduce((acc, item) => acc + item.peso, 0).toFixed(0)} kg
           </p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        </div> */}
+        <div className="flex-3 bg-white rounded-xl shadow-sm p-6">
           <p className="text-slate-500 text-sm mb-1">Peso Promedio</p>
           <p className="text-3xl font-bold text-slate-800">
             {(historyData.reduce((acc, item) => acc + item.peso, 0) / historyData.length).toFixed(1)} kg
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="flex-2 bg-white rounded-xl shadow-sm p-6">
           <p className="text-slate-500 text-sm mb-1">Operadores Activos</p>
           <p className="text-3xl font-bold text-slate-800">
             {new Set(historyData.map((item) => item.operador)).size}

@@ -162,41 +162,14 @@ export function UserGuide() {
         </p>
       </div>
 
-      {/* Quick Help Card */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-            <HelpCircle className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">
-              ¿Necesita ayuda rápida?
-            </h2>
-            <p className="text-slate-700 mb-4">
-              Encuentre respuestas a las preguntas más comunes y aprenda a usar
-              todas las funciones del sistema.
-            </p>
-            <div className="flex gap-3">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                Video Tutorial
-              </button>
-              <button className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm border border-blue-200">
-                Contactar Soporte
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Accordion Sections */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200">
         {sections.map((section, index) => (
           <div key={section.id}>
             <button
               onClick={() => toggleSection(section.id)}
-              className={`w-full flex items-center justify-between p-6 text-left hover:bg-slate-50 transition-colors ${
-                index !== 0 ? "border-t border-slate-200" : ""
-              }`}
+              className={`w-full flex items-center justify-between p-6 text-left hover:bg-slate-50 transition-colors ${index !== 0 ? "border-t border-slate-200" : ""
+                }`}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
@@ -227,8 +200,8 @@ export function UserGuide() {
       </div>
 
       {/* Additional Resources */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+      <div className="flex flex-col md:flex-row gap-4 mt-6 px-4 md:px-32">
+        <div className="flex-1 bg-white border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
           <FileText className="w-8 h-8 text-blue-600 mb-3" />
           <h3 className="font-bold text-slate-800 mb-2">Manual en PDF</h3>
           <p className="text-sm text-slate-600 mb-4">
@@ -239,20 +212,7 @@ export function UserGuide() {
           </button>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-          <Settings className="w-8 h-8 text-green-600 mb-3" />
-          <h3 className="font-bold text-slate-800 mb-2">
-            Configuración Rápida
-          </h3>
-          <p className="text-sm text-slate-600 mb-4">
-            Guía de inicio rápido para configurar el sistema
-          </p>
-          <button className="text-green-600 hover:text-green-700 text-sm font-medium">
-            Ver guía →
-          </button>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+        <div className="flex-1 bg-white border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
           <HelpCircle className="w-8 h-8 text-purple-600 mb-3" />
           <h3 className="font-bold text-slate-800 mb-2">Preguntas Frecuentes</h3>
           <p className="text-sm text-slate-600 mb-4">

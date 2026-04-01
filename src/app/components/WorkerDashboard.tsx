@@ -36,11 +36,17 @@ export function WorkerDashboard() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800">Mi Panel de Trabajo</h1>
-        <p className="text-slate-600 mt-2">
-          Resumen de tu turno y actividad del día
-        </p>
+      <div className="flex flex-row gap-4 align-items-start">
+        <div className="flex-2">
+          <h1 className="text-3xl font-bold text-slate-800">Mi Panel de Trabajo</h1>
+          <p className="text-slate-600 mt-2">
+            Resumen de tu turno y actividad del día
+          </p>
+        </div>
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-slate-800">Usuario</h1>
+          <p className="text-slate-600">Rol</p>
+        </div>
       </div>
 
       {/* Shift Info */}
@@ -75,7 +81,8 @@ export function WorkerDashboard() {
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        {/* CAMBIARLO POR PESO PROMEDIO */}
+        {/* <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-8 h-8 text-green-600" />
             <span className="text-sm text-green-600 font-medium">+5%</span>
@@ -84,9 +91,9 @@ export function WorkerDashboard() {
           <p className="text-3xl font-bold text-slate-800">
             {todayStats.totalWeight.toFixed(1)}
           </p>
-        </div>
+        </div> */}
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        {/* <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-2">
             <Calendar className="w-8 h-8 text-purple-600" />
           </div>
@@ -94,15 +101,15 @@ export function WorkerDashboard() {
           <p className="text-3xl font-bold text-slate-800">
             {todayStats.averageWeight}
           </p>
-        </div>
+        </div> */}
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        {/* <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-2">
             <AlertCircle className="w-8 h-8 text-orange-600" />
           </div>
           <p className="text-slate-600 text-sm">Alertas del Día</p>
           <p className="text-3xl font-bold text-slate-800">{todayStats.alerts}</p>
-        </div>
+        </div> */}
       </div>
 
       {/* Recent Activity */}
@@ -157,19 +164,20 @@ export function WorkerDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <button className="bg-white border-2 border-blue-600 text-blue-600 p-6 rounded-xl hover:bg-blue-50 transition-colors">
+      <div className="flex gap-4 mt-6">
+        <button className="flex-1 bg-white border-2 border-blue-600 text-blue-600 p-6 rounded-xl hover:bg-blue-50 transition-colors">
           <Package className="w-8 h-8 mb-2 mx-auto" />
           <p className="font-semibold">Nuevo Pesaje</p>
         </button>
-        <button className="bg-white border-2 border-slate-300 text-slate-700 p-6 rounded-xl hover:bg-slate-50 transition-colors">
+        <button className="flex-1 bg-white border-2 border-slate-300 text-slate-700 p-6 rounded-xl hover:bg-slate-50 transition-colors">
           <Calendar className="w-8 h-8 mb-2 mx-auto" />
           <p className="font-semibold">Ver Mi Historial</p>
         </button>
-        <button className="bg-white border-2 border-slate-300 text-slate-700 p-6 rounded-xl hover:bg-slate-50 transition-colors">
+        {/* CONSULTAR SU IMPLEMENTACION */}
+        {/* <button className="bg-white border-2 border-slate-300 text-slate-700 p-6 rounded-xl hover:bg-slate-50 transition-colors">
           <AlertCircle className="w-8 h-8 mb-2 mx-auto" />
           <p className="font-semibold">Reportar Incidencia</p>
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -83,11 +83,10 @@ export function WeightMonitor() {
           <div className="flex gap-2">
             <button
               onClick={handleTogglePause}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isPaused
-                  ? "bg-green-500 hover:bg-green-600 text-white"
-                  : "bg-yellow-500 hover:bg-yellow-600 text-white"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isPaused
+                ? "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                }`}
             >
               {isPaused ? (
                 <>
@@ -103,11 +102,10 @@ export function WeightMonitor() {
             </button>
             <button
               onClick={handleToggleConnection}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isConnected
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${isConnected
+                ? "bg-red-500 hover:bg-red-600 text-white"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}
             >
               {isConnected ? "Desconectar" : "Conectar"}
             </button>
@@ -147,13 +145,12 @@ export function WeightMonitor() {
               </div>
               <div className="h-4 bg-slate-700 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    isOverweight
-                      ? "bg-red-500"
-                      : isUnderweight
+                  className={`h-full transition-all duration-300 ${isOverweight
+                    ? "bg-red-500"
+                    : isUnderweight
                       ? "bg-yellow-500"
                       : "bg-green-500"
-                  }`}
+                    }`}
                   style={{ width: `${Math.min(percentage, 100)}%` }}
                 ></div>
               </div>
@@ -188,9 +185,9 @@ export function WeightMonitor() {
               <p className="text-2xl font-bold text-purple-900">
                 {weightData.length > 0
                   ? (
-                      weightData.reduce((acc, d) => acc + d.peso, 0) /
-                      weightData.length
-                    ).toFixed(2)
+                    weightData.reduce((acc, d) => acc + d.peso, 0) /
+                    weightData.length
+                  ).toFixed(2)
                   : "0.00"}{" "}
                 kg
               </p>
@@ -199,8 +196,8 @@ export function WeightMonitor() {
         </div>
       </div>
 
-      {/* Real-time Chart */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      {/* Real-time Chart - NO IMPLEMENTADO */}
+      {/* <div className="bg-white rounded-xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">
           Gráfico en Tiempo Real (Últimos 20 segundos)
         </h3>
@@ -240,7 +237,7 @@ export function WeightMonitor() {
             <p className="text-slate-400">Esperando datos...</p>
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Alerts */}
       {isOverweight && (

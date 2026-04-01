@@ -39,13 +39,12 @@ export function ScaleConnection() {
 
       {/* Status Card */}
       <div
-        className={`rounded-xl p-6 mb-6 ${
-          connectionStatus === "connected"
-            ? "bg-green-50 border-2 border-green-200"
-            : connectionStatus === "connecting"
+        className={`rounded-xl p-6 mb-6 ${connectionStatus === "connected"
+          ? "bg-green-50 border-2 border-green-200"
+          : connectionStatus === "connecting"
             ? "bg-yellow-50 border-2 border-yellow-200"
             : "bg-red-50 border-2 border-red-200"
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -62,8 +61,8 @@ export function ScaleConnection() {
                 {connectionStatus === "connected"
                   ? "Conectado"
                   : connectionStatus === "connecting"
-                  ? "Conectando..."
-                  : "Desconectado"}
+                    ? "Conectando..."
+                    : "Desconectado"}
               </p>
               <p className="text-sm text-slate-600">
                 {connectionStatus === "connected"
@@ -74,11 +73,10 @@ export function ScaleConnection() {
           </div>
           <button
             onClick={handleTest}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-              connectionStatus === "connected"
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${connectionStatus === "connected"
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
           >
             {connectionStatus === "connected"
               ? "Reconectar"
@@ -153,7 +151,8 @@ export function ScaleConnection() {
             />
           </div>
 
-          <div>
+          {/* Velocidad (Baud Rate) - No implementado */}
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Velocidad (Baud Rate)
             </label>
@@ -171,9 +170,10 @@ export function ScaleConnection() {
               <option value="57600">57600</option>
               <option value="115200">115200</option>
             </select>
-          </div>
+          </div> */}
 
-          <div>
+          {/* Bits de Datos - No implementado */}
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Bits de Datos
             </label>
@@ -187,9 +187,10 @@ export function ScaleConnection() {
               <option value="7">7</option>
               <option value="8">8</option>
             </select>
-          </div>
+          </div> */}
 
-          <div>
+          {/* Bits de Parada - No implementado */}
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Bits de Parada
             </label>
@@ -204,9 +205,10 @@ export function ScaleConnection() {
               <option value="1.5">1.5</option>
               <option value="2">2</option>
             </select>
-          </div>
+          </div> */}
 
-          <div>
+          {/* Paridad - No implementado */}
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Paridad
             </label>
@@ -223,7 +225,7 @@ export function ScaleConnection() {
               <option value="Mark">Mark</option>
               <option value="Space">Space</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 flex gap-4">

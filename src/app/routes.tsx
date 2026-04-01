@@ -7,7 +7,7 @@ import { WorkerDashboard } from "./components/WorkerDashboard";
 import { AdminPanel } from "./components/AdminPanel";
 import { WeightMonitor } from "./components/WeightMonitor";
 import { WeighingRegistration } from "./components/WeighingRegistration";
-import { VehicleRegistry } from "./components/VehicleRegistry";
+import { VehicleRegistryEntry } from "./components/VehicleRegistryEntry";
 import { ScaleConnection } from "./components/ScaleConnection";
 import { DatabaseConnection } from "./components/DatabaseConnection";
 import { ClientRegistry } from "./components/ClientRegistry";
@@ -21,6 +21,8 @@ import { History } from "./components/History";
 import { Settings } from "./components/Settings";
 import { Reports } from "./components/Reports";
 import { NotFound } from "./components/NotFound";
+import { VehicleRegistryExit } from "./components/VehicleRegistryExit";
+import { Profile } from "./components/Profile";
 
 // Componente para manejar el dashboard según el rol
 function DashboardRouter() {
@@ -44,7 +46,8 @@ export const router = createBrowserRouter([
       { index: true, Component: DashboardRouter },
       { path: "monitor", Component: WeightMonitor },
       { path: "weighing", Component: WeighingRegistration },
-      { path: "vehicles", Component: VehicleRegistry },
+      { path: "vehicles-entry", Component: VehicleRegistryEntry },
+      { path: "vehicles-exit", Component: VehicleRegistryExit },
       { path: "clients", Component: ClientRegistry },
       { path: "products", Component: ProductRegistry },
       { path: "operators", Component: OperatorRegistry },
@@ -58,6 +61,7 @@ export const router = createBrowserRouter([
       { path: "guide", Component: UserGuide },
       { path: "credits", Component: Credits },
       { path: "settings", Component: Settings },
+      { path: "profile", Component: Profile },
       { path: "*", Component: NotFound },
     ],
   },

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Save, Wifi, Bell, Shield, Database, Gauge } from "lucide-react";
+import { Save, Wifi, Bell, Shield, Database, Gauge, } from "lucide-react";
+import { Link } from "react-router";
 
 export function Settings() {
   const [tcpHost, setTcpHost] = useState("192.168.1.100");
@@ -14,6 +15,13 @@ export function Settings() {
     alert("Configuración guardada exitosamente");
   };
 
+  function NavAdminPanel() {
+    return (
+      <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-sm text-slate-700">
+        <Link to="/admin">Gestionar Usuarios</Link>
+      </button>
+    );
+  }
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -125,7 +133,7 @@ export function Settings() {
           </div>
 
           {/* Database */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          {/* <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="bg-purple-100 p-2 rounded-lg">
                 <Database className="w-6 h-6 text-purple-600" />
@@ -158,7 +166,7 @@ export function Settings() {
                 Respaldar Base de Datos
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Sidebar Settings */}
@@ -215,9 +223,7 @@ export function Settings() {
               <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-sm text-slate-700">
                 Cambiar Contraseña
               </button>
-              <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-sm text-slate-700">
-                Gestionar Usuarios
-              </button>
+              <NavAdminPanel />
               <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-sm text-slate-700">
                 Registro de Actividad
               </button>

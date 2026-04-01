@@ -38,13 +38,12 @@ export function DatabaseConnection() {
 
       {/* Status Card */}
       <div
-        className={`rounded-xl p-6 mb-6 ${
-          connectionStatus === "connected"
-            ? "bg-green-50 border-2 border-green-200"
-            : connectionStatus === "testing"
+        className={`rounded-xl p-6 mb-6 ${connectionStatus === "connected"
+          ? "bg-green-50 border-2 border-green-200"
+          : connectionStatus === "testing"
             ? "bg-yellow-50 border-2 border-yellow-200"
             : "bg-slate-50 border-2 border-slate-200"
-        }`}
+          }`}
       >
         <div className="flex items-center gap-3">
           {connectionStatus === "connected" ? (
@@ -59,8 +58,8 @@ export function DatabaseConnection() {
               {connectionStatus === "connected"
                 ? "Base de Datos Conectada"
                 : connectionStatus === "testing"
-                ? "Probando Conexión..."
-                : "Sin Conexión"}
+                  ? "Probando Conexión..."
+                  : "Sin Conexión"}
             </p>
             <p className="text-sm text-slate-600">
               {connectionStatus === "connected"
@@ -167,26 +166,6 @@ export function DatabaseConnection() {
           </div>
         </div>
 
-        {/* SSL Option */}
-        <div className="mt-6 pt-6 border-t border-slate-200">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={config.useSSL}
-              onChange={(e) =>
-                setConfig({ ...config, useSSL: e.target.checked })
-              }
-              className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <div>
-              <p className="font-medium text-slate-800">Usar SSL/TLS</p>
-              <p className="text-sm text-slate-600">
-                Conexión cifrada para mayor seguridad
-              </p>
-            </div>
-          </label>
-        </div>
-
         {/* Actions */}
         <div className="mt-6 flex gap-4">
           <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
@@ -222,7 +201,6 @@ export function DatabaseConnection() {
           </p>
           <ul className="text-sm text-yellow-700 space-y-1">
             <li>• Use contraseñas seguras</li>
-            <li>• Active SSL en producción</li>
             <li>• Configure backups automáticos</li>
           </ul>
         </div>

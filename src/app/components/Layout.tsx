@@ -21,6 +21,7 @@ import {
   FileX,
   BookOpen,
   Award,
+  CircleUser,
 } from "lucide-react";
 
 export function Layout() {
@@ -47,11 +48,23 @@ export function Layout() {
     navigate("/login");
   };
 
+  function Main() {
+    return (
+      <div className="gap-2">
+        <Link to="/" className="flex flex-row gap-3 items-center">
+          <Scale className="w-8 h-8 text-blue-300" />
+          <span className="font-bold text-lg">Balanza Pro</span>
+        </Link>
+      </div>
+    );
+  }
+
   const adminMenuItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard" },
     { path: "/monitor", icon: Activity, label: "Monitoreo en Vivo" },
     { path: "/weighing", icon: Scale, label: "Registro de Pesadas" },
-    { path: "/vehicles", icon: Truck, label: "Vehículos" },
+    { path: "/vehicles-entry", icon: Truck, label: "Vehículos Entrada" },
+    { path: "/vehicles-exit", icon: Truck, label: "Vehículos Salida" },
     { path: "/clients", icon: Building2, label: "Clientes/Proveedores" },
     { path: "/products", icon: Package, label: "Productos" },
     { path: "/operators", icon: UserCog, label: "Operadores" },
@@ -63,6 +76,7 @@ export function Layout() {
     { path: "/ticket-config", icon: FileText, label: "Config. Tickets" },
     { path: "/admin", icon: Shield, label: "Panel Admin" },
     { path: "/guide", icon: BookOpen, label: "Guía de Usuario" },
+    { path: "/profile", icon: CircleUser, label: "Perfil de Usuario" },
     { path: "/credits", icon: Award, label: "Créditos" },
     { path: "/settings", icon: Settings, label: "Configuración" },
   ];
@@ -71,9 +85,11 @@ export function Layout() {
     { path: "/", icon: LayoutDashboard, label: "Mi Panel" },
     { path: "/monitor", icon: Activity, label: "Monitoreo en Vivo" },
     { path: "/weighing", icon: Scale, label: "Registro de Pesadas" },
-    { path: "/vehicles", icon: Truck, label: "Vehículos" },
+    { path: "/vehicles-entry", icon: Truck, label: "Vehículos Entrada" },
+    { path: "/vehicles-exit", icon: Truck, label: "Vehículos Salida" },// MODIFICAR
     { path: "/history", icon: History, label: "Mi Historial" },
     { path: "/guide", icon: BookOpen, label: "Guía de Usuario" },
+    { path: "/profile", icon: UserCog, label: "Mi Perfil" },
     { path: "/settings", icon: Settings, label: "Mi Configuración" },
   ];
 
@@ -83,18 +99,14 @@ export function Layout() {
     <div className="min-h-screen bg-slate-100 flex">
       {/* Sidebar */}
       <aside
-        className={`${
-          isSidebarOpen ? "w-64" : "w-20"
-        } bg-slate-900 text-white transition-all duration-300 flex flex-col`}
+        className={`${isSidebarOpen ? "w-64" : "w-20"
+          } bg-slate-900 text-white transition-all duration-300 flex flex-col`}
       >
         {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           {isSidebarOpen ? (
             <>
-              <div className="flex items-center gap-2">
-                <Scale className="w-8 h-8 text-blue-400" />
-                <span className="font-bold text-lg">Balanza Pro</span>
-              </div>
+              <Main />
               <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="p-1 hover:bg-slate-800 rounded"
@@ -126,11 +138,10 @@ export function Layout() {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                      isActive
-                        ? "bg-blue-600 text-white"
-                        : "text-slate-300 hover:bg-slate-800"
-                    }`}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${isActive
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-300 hover:bg-slate-800"
+                      }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     {isSidebarOpen && (

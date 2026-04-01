@@ -3,7 +3,7 @@ import { Award, Mail, Phone, Globe, Building2, Code } from "lucide-react";
 export function Credits() {
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
           <Award className="w-8 h-8 text-blue-600" />
           Créditos y Acerca de
@@ -51,7 +51,7 @@ export function Credits() {
             </div>
             <div className="flex justify-between py-2">
               <span className="text-slate-600">Plataforma:</span>
-              <span className="font-medium text-slate-800">Web/Cloud</span>
+              <span className="font-medium text-slate-800">Local</span>
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export function Credits() {
                   href="mailto:contacto@allprocess.com.pe"
                   className="font-medium text-slate-800 hover:text-blue-600"
                 >
-                  contacto@allprocess.com.pe
+                  info@allprocess.com.pe
                 </a>
               </div>
             </div>
@@ -82,7 +82,7 @@ export function Credits() {
                   href="tel:+51987654321"
                   className="font-medium text-slate-800 hover:text-blue-600"
                 >
-                  +51 987 654 321
+                  +51 978 574 600
                 </a>
               </div>
             </div>
@@ -133,8 +133,8 @@ export function Credits() {
               description: "Registro completo de entrada y salida",
             },
             {
-              title: "Gestión de Clientes",
-              description: "Base de datos de clientes y proveedores",
+              title: "Gestión de Usuarios",
+              description: "Base de datos de usuarios y proveedores",
             },
             {
               title: "Reportes Avanzados",
@@ -152,10 +152,10 @@ export function Credits() {
               title: "Tickets Personalizables",
               description: "Formatos de tickets configurables",
             },
-            {
-              title: "Auditoría Completa",
-              description: "Registro de todas las operaciones",
-            },
+            // {
+            //   title: "Auditoría Completa",
+            //   description: "Registro de todas las operaciones",
+            // },
           ].map((feature, index) => (
             <div
               key={index}
