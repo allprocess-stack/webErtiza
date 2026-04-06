@@ -7,20 +7,28 @@ export function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulación de login - en producción conectar con backend real
-    if (username && password) {
-      localStorage.setItem("isAuthenticated", "true");
+    try {
+      const response = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuario: username, password: password }),
+      });
+      const data = await response.json();
+      // Guarda Datos
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", data.user.rol);
+      localStorage.setItem("userName", data.user.usuario);
+      localStorage.setItem("password", data.user.password);
 
-      // Determinar rol basado en el usuario (simulación)
-      // admin@empresa.com -> admin
-      // cualquier otro -> worker
-      const role = username.toLowerCase().includes("admin") ? "admin" : "worker";
-      localStorage.setItem("userRole", role);
-      localStorage.setItem("userName", username);
-
+      // Redirigir
       navigate("/");
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("No se pudo conectar con el servidor");
     }
   };
 

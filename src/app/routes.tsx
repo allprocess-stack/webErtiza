@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { Login } from "./components/Login";
 import { ForgotPassword } from "./components/ForgotPassword";
 import { Layout } from "./components/Layout";
@@ -24,10 +24,17 @@ import { NotFound } from "./components/NotFound";
 import { VehicleRegistryExit } from "./components/VehicleRegistryExit";
 import { Profile } from "./components/Profile";
 
+
 // Componente para manejar el dashboard según el rol
 function DashboardRouter() {
+  const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
-  return userRole === "admin" ? <Dashboard /> : <WorkerDashboard />;
+  console.log(userRole);
+  if (!token) return <Navigate to="/login" />;
+
+  if (userRole === "admin") return <Dashboard />;
+  if (userRole === "worker") return <WorkerDashboard />;
+  return <Navigate to="/login" />;
 }
 
 export const router = createBrowserRouter([
