@@ -31,9 +31,22 @@ export function Layout() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
+  /*
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAuthenticated");
     if (!isAuthenticated) {
+      navigate("/login");
+    } else {
+      setUserRole(localStorage.getItem("userRole"));
+      setUserName(localStorage.getItem("userName"));
+    }
+  }, [navigate]);
+  */
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
       navigate("/login");
     } else {
       setUserRole(localStorage.getItem("userRole"));

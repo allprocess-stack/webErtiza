@@ -24,6 +24,7 @@ export function Login() {
       localStorage.setItem("userName", data.user.usuario);
       localStorage.setItem("password", data.user.password);
 
+      localStorage.setItem("isAuthenticated", "true");
       // Redirigir
       navigate("/");
     } catch (error) {
