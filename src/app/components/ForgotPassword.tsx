@@ -6,13 +6,43 @@ export function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  /*
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulación de envío de correo - en producción conectar con backend real
     if (email) {
       setIsSubmitted(true);
     }
-  };
+  };*/
+
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/api/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.error || data.message || "Error");
+        return;
+      }
+      // Mostrar mensaje de éxito
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error("Error during password reset:", error);
+      alert("No se pudo conectar con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (isSubmitted) {
     return (
@@ -83,9 +113,10 @@ export function ForgotPassword() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg disabled:opacity-50"
             >
-              Enviar Instrucciones
+              {loading ? "Enviando..." : "Enviar Instrucciones"}
             </button>
           </form>
 
