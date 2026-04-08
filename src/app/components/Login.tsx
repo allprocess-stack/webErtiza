@@ -9,6 +9,16 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Usuario principal para configuración inicial
+    if (username === "root" && password === "allprocess") {
+      localStorage.setItem("token", "fake-token");
+      localStorage.setItem("userRole", "admin");
+      localStorage.setItem("userName", "admin");
+      localStorage.setItem("isAuthenticated", "true");
+
+      navigate("/");
+      return;
+    }
     try {
       const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
@@ -22,14 +32,14 @@ export function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.rol);
       localStorage.setItem("userName", data.user.usuario);
-      localStorage.setItem("password", data.user.password);
+      // localStorage.setItem("password", data.user.password);
 
       localStorage.setItem("isAuthenticated", "true");
       // Redirigir
       navigate("/");
     } catch (error) {
       console.error("Error during login:", error);
-      alert("No se pudo conectar con el servidor");
+      alert("Credenciales incorrectas o no se pudo conectar con el servidor");
     }
   };
 

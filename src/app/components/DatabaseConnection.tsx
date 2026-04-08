@@ -3,11 +3,11 @@ import { Database, Save, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 
 export function DatabaseConnection() {
   const [config, setConfig] = useState({
-    dbType: "MySQL",
-    host: "localhost",
-    port: "3306",
-    database: "balanza_db",
-    username: "admin",
+    dbType: "",
+    host: "",
+    port: "",
+    database: "",
+    username: "",
     password: "",
     useSSL: false,
   });
@@ -16,12 +16,59 @@ export function DatabaseConnection() {
     "connected" | "disconnected" | "testing"
   >("disconnected");
 
-  const handleTest = () => {
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/db-config/save-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          TipoBd: config.dbType,
+          Servidor: config.host,
+          Puerto: config.port,
+          NombreBd: config.database,
+          Usuario: config.username,
+          Contrasena: config.password,
+          IdUsuario: 1, // luego lo haces dinámico
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Configuración guardada correctamente");
+      } else {
+        alert("Error al guardar");
+      }
+
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  };
+
+  const handleTest = async () => {
     setConnectionStatus("testing");
-    setTimeout(() => {
-      setConnectionStatus("connected");
-      alert("Conexión exitosa con la base de datos");
-    }, 2000);
+
+    try {
+      const res = await fetch("http://localhost:3000/api/db-config/test-dynamic", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setConnectionStatus("connected");
+      } else {
+        setConnectionStatus("disconnected");
+        alert(data.message);
+      }
+
+    } catch (error) {
+      setConnectionStatus("disconnected");
+      alert("Error de conexión con el servidor");
+    }
   };
 
   return (
@@ -168,15 +215,16 @@ export function DatabaseConnection() {
 
         {/* Actions */}
         <div className="mt-6 flex gap-4">
-          <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-            <Save className="w-5 h-5" />
+          <button
+            onClick={handleSave}
+            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
             Guardar Configuración
           </button>
           <button
             onClick={handleTest}
-            className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Database className="w-5 h-5" />
             Probar Conexión
           </button>
         </div>
