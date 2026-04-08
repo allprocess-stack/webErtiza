@@ -9,7 +9,7 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Usuario principal para configuración inicial
+    // Usuario Maestro para configuración inicial
     if (username === "root" && password === "allprocess") {
       localStorage.setItem("token", "fake-token");
       localStorage.setItem("userRole", "admin");

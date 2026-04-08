@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Database, Save, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+
 
 export function DatabaseConnection() {
   const [config, setConfig] = useState({
@@ -39,6 +40,7 @@ export function DatabaseConnection() {
 
       if (data.success) {
         alert("Configuración guardada correctamente");
+        await loadConfig();
       } else {
         alert("Error al guardar");
       }
@@ -47,6 +49,31 @@ export function DatabaseConnection() {
       alert("Error de conexión con el backend");
     }
   };
+
+  const loadConfig = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/db-config/config");
+      const data = await res.json();
+
+      if (data) {
+        setConfig({
+          dbType: data.TipoBd,
+          host: data.Servidor,
+          port: data.Puerto,
+          database: data.NombreBd,
+          username: data.Usuario,
+          password: data.Contrasena,
+          useSSL: false,
+        });
+      }
+
+    } catch (error) {
+      console.error("Error cargando config");
+    }
+  };
+  useEffect(() => {
+    loadConfig();
+  }, []);
 
   const handleTest = async () => {
     setConnectionStatus("testing");
@@ -256,3 +283,4 @@ export function DatabaseConnection() {
     </div>
   );
 }
+
