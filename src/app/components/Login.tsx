@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { Scale, Lock, User } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 export function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  // Acceso a función de login del contexto
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Usuario Maestro para configuración inicial
     if (username === "root" && password === "allprocess") {
-      localStorage.setItem("token", "fake-token");
-      localStorage.setItem("userRole", "admin");
-      localStorage.setItem("userName", "admin");
-      localStorage.setItem("isAuthenticated", "true");
+      login({
+        id: null,
+        nombre: "root",
+        rol: "admin",
+        token: "fake-token",
+      });
 
       navigate("/");
       return;
@@ -29,12 +34,12 @@ export function Login() {
       });
       const data = await response.json();
       // Guarda Datos
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", data.user.rol);
-      localStorage.setItem("userName", data.user.usuario);
-      // localStorage.setItem("password", data.user.password);
-
-      localStorage.setItem("isAuthenticated", "true");
+      login({
+        id: data.user.id,
+        nombre: data.user.usuario,
+        rol: data.user.rol,
+        token: data.token,
+      });
       // Redirigir
       navigate("/");
     } catch (error) {

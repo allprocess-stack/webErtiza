@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { Database, Save, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 
 export function DatabaseConnection() {
+  const { user } = useAuth();
+  // Estado para bloquear el formulario 
+  const [isLocked, setIsLocked] = useState(false);
+
   const [config, setConfig] = useState({
     dbType: "",
     host: "",
@@ -32,7 +37,7 @@ export function DatabaseConnection() {
           NombreBd: config.database,
           Usuario: config.username,
           Contrasena: config.password,
-          IdUsuario: 1, // luego lo haces dinámico
+          IdUsuario: user.nombre === "root" ? null : 1, // luego lo haces dinámico
         }),
       });
 
@@ -44,7 +49,6 @@ export function DatabaseConnection() {
       } else {
         alert("Error al guardar");
       }
-
     } catch (error) {
       alert("Error de conexión con el backend");
     }
@@ -71,29 +75,76 @@ export function DatabaseConnection() {
       console.error("Error cargando config");
     }
   };
+
   useEffect(() => {
-    loadConfig();
+    const checkConnection = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/db-config/connection-status");
+        const data = await res.json();
+
+        if (data.connected) {
+          setConnectionStatus("connected");
+          setIsLocked(true); // bloquea inputs
+          await loadConfig(); // carga config actualizada
+        } else {
+          setConnectionStatus("disconnected");
+          setIsLocked(false);
+        }
+
+      } catch (error) {
+        console.error("Error verificando conexión");
+      }
+    };
+    checkConnection();
   }, []);
 
-  const handleTest = async () => {
+  const handleConnectionToggle = async () => {
+    // DESCONECTAR
+    if (connectionStatus === "connected") {
+      await fetch("http://localhost:3000/api/db-config/disconnect", {
+        method: "POST",
+      });
+
+      setConnectionStatus("disconnected");
+      setIsLocked(false);
+      localStorage.setItem("db_connected", "false");
+      return;
+    }
+
+    // CONECTAR
     setConnectionStatus("testing");
 
     try {
       const res = await fetch("http://localhost:3000/api/db-config/test-dynamic", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          TipoBd: config.dbType,
+          Servidor: config.host,
+          Puerto: config.port,
+          NombreBd: config.database,
+          Usuario: config.username,
+          Contrasena: config.password,
+        }),
       });
 
       const data = await res.json();
 
       if (data.success) {
         setConnectionStatus("connected");
+        setIsLocked(true);
+        localStorage.setItem("db_connected", "true");
       } else {
         setConnectionStatus("disconnected");
+        setIsLocked(false);
         alert(data.message);
       }
 
     } catch (error) {
       setConnectionStatus("disconnected");
+      setIsLocked(false);
       alert("Error de conexión con el servidor");
     }
   };
@@ -157,6 +208,7 @@ export function DatabaseConnection() {
             </label>
             <select
               value={config.dbType}
+              disabled={isLocked}
               onChange={(e) => setConfig({ ...config, dbType: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -174,6 +226,7 @@ export function DatabaseConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.host}
               onChange={(e) => setConfig({ ...config, host: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -187,6 +240,7 @@ export function DatabaseConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.port}
               onChange={(e) => setConfig({ ...config, port: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -200,6 +254,7 @@ export function DatabaseConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.database}
               onChange={(e) =>
                 setConfig({ ...config, database: e.target.value })
@@ -215,6 +270,7 @@ export function DatabaseConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.username}
               onChange={(e) =>
                 setConfig({ ...config, username: e.target.value })
@@ -230,6 +286,7 @@ export function DatabaseConnection() {
             </label>
             <input
               type="password"
+              disabled={isLocked}
               value={config.password}
               onChange={(e) =>
                 setConfig({ ...config, password: e.target.value })
@@ -249,10 +306,17 @@ export function DatabaseConnection() {
             Guardar Configuración
           </button>
           <button
-            onClick={handleTest}
-            className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={handleConnectionToggle}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-colors ${connectionStatus === "connected"
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-green-600 hover:bg-green-700"
+              } text-white`}
           >
-            Probar Conexión
+            {connectionStatus === "connected"
+              ? "Desconectar"
+              : connectionStatus === "testing"
+                ? "Conectando..."
+                : "Probar Conexión"}
           </button>
         </div>
       </div>

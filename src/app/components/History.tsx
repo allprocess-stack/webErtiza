@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Calendar, Download, Filter, Search } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 export function History() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Datos de ejemplo del historial

@@ -8,6 +8,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface Vehicle {
   id: string;
@@ -21,6 +22,8 @@ interface Vehicle {
 }
 
 export function VehicleRegistryEntry() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [vehicles, setVehicles] = useState<Vehicle[]>([
     {

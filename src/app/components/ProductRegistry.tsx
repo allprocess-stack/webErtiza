@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Package, Plus, Search, Edit, Trash2, Barcode } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface Product {
   id: string;
@@ -13,6 +14,8 @@ interface Product {
 }
 
 export function ProductRegistry() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([
     {
@@ -181,11 +184,10 @@ export function ProductRegistry() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                        product.status === "active"
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${product.status === "active"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {product.status === "active" ? "Activo" : "Inactivo"}
                     </span>

@@ -7,10 +7,13 @@ import {
   Printer,
   Calendar,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 type WeighingType = "first" | "second";
 
 export function WeighingRegistration() {
+  const { user } = useAuth();
+
   const [weighingType, setWeighingType] = useState<WeighingType>("first");
   const [formData, setFormData] = useState({
     ticketNumber: "",

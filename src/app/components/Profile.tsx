@@ -14,10 +14,13 @@ import {
     LockKeyhole,
     CircleUser,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 type WeighingType = "first" | "second";
 
 export function Profile() {
+    const { user } = useAuth();
+
     const [weighingType, setWeighingType] = useState<WeighingType>("first");
     const [formData, setFormData] = useState({
         name: "",

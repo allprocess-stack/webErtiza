@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileText, Save, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface PrefixFormat {
   id: string;
@@ -11,6 +12,8 @@ interface PrefixFormat {
 }
 
 export function TicketPrefixConfig() {
+  const { user } = useAuth();
+
   const [formats, setFormats] = useState<PrefixFormat[]>([
     {
       id: "1",
@@ -266,11 +269,10 @@ export function TicketPrefixConfig() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                        format.active
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${format.active
                           ? "bg-green-100 text-green-700"
                           : "bg-slate-100 text-slate-700"
-                      }`}
+                        }`}
                     >
                       {format.active ? "Activo" : "Inactivo"}
                     </span>

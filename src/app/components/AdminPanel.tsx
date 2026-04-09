@@ -9,6 +9,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface User {
   id: string;
@@ -20,6 +21,8 @@ interface User {
 }
 
 export function AdminPanel() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [users, setUsers] = useState<User[]>([
@@ -74,9 +77,9 @@ export function AdminPanel() {
       users.map((user) =>
         user.id === id
           ? {
-              ...user,
-              status: user.status === "active" ? "inactive" : "active",
-            }
+            ...user,
+            status: user.status === "active" ? "inactive" : "active",
+          }
           : user
       )
     );
@@ -199,11 +202,10 @@ export function AdminPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        user.role === "admin"
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.role === "admin"
                           ? "bg-purple-100 text-purple-700"
                           : "bg-blue-100 text-blue-700"
-                      }`}
+                        }`}
                     >
                       {user.role === "admin" ? (
                         <Shield className="w-3 h-3" />
@@ -216,11 +218,10 @@ export function AdminPanel() {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleToggleStatus(user.id)}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        user.status === "active"
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === "active"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {user.status === "active" ? (
                         <CheckCircle className="w-3 h-3" />

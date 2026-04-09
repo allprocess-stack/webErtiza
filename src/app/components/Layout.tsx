@@ -23,41 +23,28 @@ import {
   Award,
   CircleUser,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 export function Layout() {
+  const { user, logout } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
-  /*
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
+    if (!user) {
       navigate("/login");
     } else {
-      setUserRole(localStorage.getItem("userRole"));
-      setUserName(localStorage.getItem("userName"));
+      setUserRole(user.rol);
+      setUserName(user.nombre);
     }
-  }, [navigate]);
-  */
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
-    } else {
-      setUserRole(localStorage.getItem("userRole"));
-      setUserName(localStorage.getItem("userName"));
-    }
-  }, [navigate]);
+  }, [user]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userName");
+    logout();
     navigate("/login");
   };
 

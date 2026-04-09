@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Save, Wifi, Bell, Shield, Database, Gauge, } from "lucide-react";
 import { Link } from "react-router";
+import { useAuth } from "./AuthContext";
 
 export function Settings() {
+  const { user } = useAuth();
+
   const [tcpHost, setTcpHost] = useState("192.168.1.100");
   const [tcpPort, setTcpPort] = useState("5000");
   const [maxWeight, setMaxWeight] = useState("2000");

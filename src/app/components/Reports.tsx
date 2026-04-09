@@ -1,7 +1,10 @@
 import { FileText, Download, TrendingUp, PieChart } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell } from "recharts";
+import { useAuth } from "./AuthContext";
 
 export function Reports() {
+  const { user } = useAuth();
+
   const dailyData = [
     { dia: "Lun", mediciones: 42 },
     { dia: "Mar", mediciones: 38 },

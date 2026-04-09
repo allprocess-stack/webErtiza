@@ -9,6 +9,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "./AuthContext";
 
 interface Section {
   id: string;
@@ -18,6 +19,8 @@ interface Section {
 }
 
 export function UserGuide() {
+  const { user } = useAuth();
+
   const [openSection, setOpenSection] = useState<string | null>("1");
 
   const sections: Section[] = [

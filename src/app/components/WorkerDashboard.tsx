@@ -5,8 +5,11 @@ import {
   Package,
   AlertCircle,
 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 export function WorkerDashboard() {
+  const { user } = useAuth();
+
   const currentShift = {
     start: "08:00",
     end: "16:00",

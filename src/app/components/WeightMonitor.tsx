@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Scale, Wifi, WifiOff, Play, Pause, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useAuth } from "./AuthContext";
 
 export function WeightMonitor() {
+  const { user } = useAuth();
+
   const [isConnected, setIsConnected] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(1250.5);

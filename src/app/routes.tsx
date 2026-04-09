@@ -23,17 +23,18 @@ import { Reports } from "./components/Reports";
 import { NotFound } from "./components/NotFound";
 import { VehicleRegistryExit } from "./components/VehicleRegistryExit";
 import { Profile } from "./components/Profile";
+import { useAuth } from "./components/AuthContext";
 
 
 // Componente para manejar el dashboard según el rol
 function DashboardRouter() {
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("userRole");
-  console.log(userRole);
-  if (!token) return <Navigate to="/login" />;
+  const { user } = useAuth();
 
-  if (userRole === "admin") return <Dashboard />;
-  if (userRole === "worker") return <WorkerDashboard />;
+
+  if (!user) return <Navigate to="/login" />;
+
+  if (user.rol === "admin") return <Dashboard />;
+  if (user.rol === "worker") return <WorkerDashboard />;
   return <Navigate to="/login" />;
 }
 

@@ -1,28 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Network, Wifi, Save, RefreshCw, CheckCircle } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 export function ScaleConnection() {
+  const { user } = useAuth();
+
   const [config, setConfig] = useState({
-    ipAddress: "192.168.1.100",
-    port: "502",
-    protocol: "TCP/IP",
-    timeout: "5000",
-    baudRate: "9600",
-    dataBits: "8",
-    stopBits: "1",
-    parity: "None",
+    ipAddress: "",
+    port: "",
+    protocol: "",
   });
 
   const [connectionStatus, setConnectionStatus] = useState<
     "connected" | "disconnected" | "connecting"
   >("disconnected");
 
-  const handleTest = () => {
-    setConnectionStatus("connecting");
-    setTimeout(() => {
-      setConnectionStatus("connected");
-      alert("Conexión exitosa con la balanza");
-    }, 2000);
+  const handleSave = async () => { }
+
+  const loadConfig = async () => { }
+
+  useEffect(() => { }, []);
+
+  const handleConnectionToggle = () => {
+
   };
 
   return (
@@ -72,7 +72,7 @@ export function ScaleConnection() {
             </div>
           </div>
           <button
-            onClick={handleTest}
+            // onClick={handleTest}
             className={`px-6 py-2 rounded-lg font-medium transition-colors ${connectionStatus === "connected"
               ? "bg-green-600 text-white hover:bg-green-700"
               : "bg-blue-600 text-white hover:bg-blue-700"
@@ -136,96 +136,6 @@ export function ScaleConnection() {
               <option value="Serial">Serial</option>
             </select>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Timeout (ms)
-            </label>
-            <input
-              type="number"
-              value={config.timeout}
-              onChange={(e) =>
-                setConfig({ ...config, timeout: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Velocidad (Baud Rate) - No implementado */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Velocidad (Baud Rate)
-            </label>
-            <select
-              value={config.baudRate}
-              onChange={(e) =>
-                setConfig({ ...config, baudRate: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="4800">4800</option>
-              <option value="9600">9600</option>
-              <option value="19200">19200</option>
-              <option value="38400">38400</option>
-              <option value="57600">57600</option>
-              <option value="115200">115200</option>
-            </select>
-          </div> */}
-
-          {/* Bits de Datos - No implementado */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Bits de Datos
-            </label>
-            <select
-              value={config.dataBits}
-              onChange={(e) =>
-                setConfig({ ...config, dataBits: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
-          </div> */}
-
-          {/* Bits de Parada - No implementado */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Bits de Parada
-            </label>
-            <select
-              value={config.stopBits}
-              onChange={(e) =>
-                setConfig({ ...config, stopBits: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="1">1</option>
-              <option value="1.5">1.5</option>
-              <option value="2">2</option>
-            </select>
-          </div> */}
-
-          {/* Paridad - No implementado */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Paridad
-            </label>
-            <select
-              value={config.parity}
-              onChange={(e) =>
-                setConfig({ ...config, parity: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="None">None</option>
-              <option value="Even">Even</option>
-              <option value="Odd">Odd</option>
-              <option value="Mark">Mark</option>
-              <option value="Space">Space</option>
-            </select>
-          </div> */}
         </div>
 
         <div className="mt-6 flex gap-4">
@@ -234,7 +144,7 @@ export function ScaleConnection() {
             Guardar Configuración
           </button>
           <button
-            onClick={handleTest}
+            // onClick={handleTest}
             className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
           >
             <RefreshCw className="w-5 h-5" />

@@ -9,8 +9,11 @@ import {
   Clock,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useAuth } from "./AuthContext";
 
 export function Dashboard() {
+  const { user } = useAuth();
+
   const [currentWeight, setCurrentWeight] = useState(1250.5);
   const [status, setStatus] = useState<"stable" | "weighing" | "error">("stable");
 
@@ -91,20 +94,19 @@ export function Dashboard() {
             </h2>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${
-                  status === "stable"
+                className={`w-3 h-3 rounded-full ${status === "stable"
                     ? "bg-green-400"
                     : status === "weighing"
-                    ? "bg-yellow-400 animate-pulse"
-                    : "bg-red-400"
-                }`}
+                      ? "bg-yellow-400 animate-pulse"
+                      : "bg-red-400"
+                  }`}
               ></div>
               <span className="text-blue-100">
                 {status === "stable"
                   ? "Estable"
                   : status === "weighing"
-                  ? "Pesando..."
-                  : "Error"}
+                    ? "Pesando..."
+                    : "Error"}
               </span>
             </div>
           </div>

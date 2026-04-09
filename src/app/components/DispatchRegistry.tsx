@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileX, Search, Filter, Eye, Trash2, Calendar } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface Dispatch {
   id: string;
@@ -15,6 +16,8 @@ interface Dispatch {
 }
 
 export function DispatchRegistry() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [dispatches, setDispatches] = useState<Dispatch[]>([
@@ -220,11 +223,10 @@ export function DispatchRegistry() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                        dispatch.status === "despachado"
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${dispatch.status === "despachado"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {dispatch.status === "despachado"
                         ? "Despachado"

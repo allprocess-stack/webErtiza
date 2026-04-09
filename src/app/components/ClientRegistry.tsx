@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Users, Building2, Plus, Search, Edit, Trash2 } from "lucide-react";
+import { useAuth } from "./AuthContext";
 
 interface Client {
   id: string;
@@ -12,6 +13,8 @@ interface Client {
 }
 
 export function ClientRegistry() {
+  const { user } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [clients, setClients] = useState<Client[]>([
