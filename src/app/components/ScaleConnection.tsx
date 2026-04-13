@@ -5,6 +5,8 @@ import { useAuth } from "./AuthContext";
 export function ScaleConnection() {
   const { user } = useAuth();
 
+  const [isLocked, setIsLocked] = useState(false);
+
   const [config, setConfig] = useState({
     ipAddress: "",
     port: "",
@@ -15,14 +17,106 @@ export function ScaleConnection() {
     "connected" | "disconnected" | "connecting"
   >("disconnected");
 
-  const handleSave = async () => { }
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/scale-config/save-config",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Ip: config.ipAddress,
+            Puerto: config.port,
+            Protocolo: config.protocol,
+            IdUsuario: user.nombre === "root" ? null : 1
+          }),
+        });
+      const data = await res.json();
+      if (data.success) {
+        alert("Configuración guardada correctamente");
+        await loadConfig();
+      } else {
+        alert("Error al guardar");
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  }
 
-  const loadConfig = async () => { }
+  const loadConfig = async () => {
+    try {
+      const res = await fetch("/api/scale-config/config");
+      const data = await res.json();
+      if (data) {
+        setConfig({
+          ipAddress: data.Ip || "",
+          port: data.Puerto || "",
+          protocol: data.Protocolo || "",
+        });
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  }
 
-  useEffect(() => { }, []);
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const res = await fetch("/api/scale-config/connection-status");
+        const data = await res.json();
+        if (data.connected) {
+          setConnectionStatus("connected");
+          setIsLocked(true); // bloquea inputs
+        } else {
+          setConnectionStatus("disconnected");
+          setIsLocked(false);
+        }
+      } catch (error) {
+        console.error("Error al verificar conexión", error);
+      }
+    };
+  }, []);
 
-  const handleConnectionToggle = () => {
+  const handleConnectionToggle = async () => {
+    if (connectionStatus === "connected") {
+      await fetch("/api/scale-config/disconnect", { method: "POST" });
+      setConnectionStatus("disconnected");
+      setIsLocked(false);
+      localStorage.setItem("tcp_connected", "false");
+      return;
+    }
 
+    setConnectionStatus("connecting");
+
+    try {
+      const res = await fetch("/api/scale-config/test-connection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Ip: config.ipAddress,
+          Puerto: config.port,
+          Protocolo: config.protocol,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setConnectionStatus("connected");
+        setIsLocked(true);
+        localStorage.setItem("tcp_connected", "true");
+      } else {
+        setConnectionStatus("disconnected");
+        setIsLocked(false);
+        alert(data.message);
+      }
+    } catch (error) {
+      setConnectionStatus("disconnected");
+      setIsLocked(false);
+      alert("Error de conexión con el servidor");
+    }
   };
 
   return (
@@ -71,17 +165,7 @@ export function ScaleConnection() {
               </p>
             </div>
           </div>
-          <button
-            // onClick={handleTest}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${connectionStatus === "connected"
-              ? "bg-green-600 text-white hover:bg-green-700"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-          >
-            {connectionStatus === "connected"
-              ? "Reconectar"
-              : "Probar Conexión"}
-          </button>
+
         </div>
       </div>
 
@@ -98,6 +182,7 @@ export function ScaleConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.ipAddress}
               onChange={(e) =>
                 setConfig({ ...config, ipAddress: e.target.value })
@@ -113,6 +198,7 @@ export function ScaleConnection() {
             </label>
             <input
               type="text"
+              disabled={isLocked}
               value={config.port}
               onChange={(e) => setConfig({ ...config, port: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -126,28 +212,28 @@ export function ScaleConnection() {
             </label>
             <select
               value={config.protocol}
+              disabled={isLocked}
               onChange={(e) =>
                 setConfig({ ...config, protocol: e.target.value })
               }
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="TCP/IP">TCP/IP</option>
-              <option value="Modbus TCP">Modbus TCP</option>
-              <option value="Serial">Serial</option>
+              {/* <option value="Modbus TCP">Modbus TCP</option>
+              <option value="Serial">Serial</option> */}
             </select>
           </div>
         </div>
 
         <div className="mt-6 flex gap-4">
-          <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+          <button onClick={handleSave} className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
             <Save className="w-5 h-5" />
             Guardar Configuración
           </button>
           <button
-            // onClick={handleTest}
+            onClick={handleConnectionToggle}
             className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
           >
-            <RefreshCw className="w-5 h-5" />
             Probar Conexión
           </button>
         </div>

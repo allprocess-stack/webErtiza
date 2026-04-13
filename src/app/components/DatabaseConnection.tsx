@@ -19,13 +19,13 @@ export function DatabaseConnection() {
   });
 
   const [connectionStatus, setConnectionStatus] = useState<
-    "connected" | "disconnected" | "testing"
+    "connected" | "disconnected" | "connecting" | "testing"
   >("disconnected");
 
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/save-config", {
+      const res = await fetch("/api/db-config/save-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,9 +56,8 @@ export function DatabaseConnection() {
 
   const loadConfig = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/config");
+      const res = await fetch("/api/db-config/config");
       const data = await res.json();
-
       if (data) {
         setConfig({
           dbType: data.TipoBd,
@@ -79,7 +78,7 @@ export function DatabaseConnection() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/db-config/connection-status");
+        const res = await fetch("/api/db-config/connection-status");
         const data = await res.json();
 
         if (data.connected) {
@@ -92,7 +91,7 @@ export function DatabaseConnection() {
         }
 
       } catch (error) {
-        console.error("Error verificando conexión");
+        console.error("Error al verificar conexión", error);
       }
     };
     checkConnection();
