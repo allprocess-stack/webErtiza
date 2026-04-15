@@ -14,7 +14,7 @@ export function ScaleConnection() {
   });
 
   const [connectionStatus, setConnectionStatus] = useState<
-    "connected" | "disconnected" | "connecting"
+    "connected" | "disconnected" | "connecting" | "testing"
   >("disconnected");
 
   const handleSave = async () => {
@@ -76,18 +76,19 @@ export function ScaleConnection() {
         console.error("Error al verificar conexión", error);
       }
     };
+    checkConnection();
   }, []);
 
   const handleConnectionToggle = async () => {
     if (connectionStatus === "connected") {
       await fetch("/api/scale-config/disconnect", { method: "POST" });
+
       setConnectionStatus("disconnected");
       setIsLocked(false);
       localStorage.setItem("tcp_connected", "false");
       return;
     }
-
-    setConnectionStatus("connecting");
+    setConnectionStatus("testing");
 
     try {
       const res = await fetch("/api/scale-config/test-connection", {

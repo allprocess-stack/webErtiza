@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { FileText, Save, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FileText, Save, Plus, Trash2, Check, Upload, RefreshCw } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
 interface PrefixFormat {
-  id: string;
+  id: number;
   name: string;
-  prefix: string;
   format: string;
   example: string;
   active: boolean;
@@ -14,48 +13,105 @@ interface PrefixFormat {
 export function TicketPrefixConfig() {
   const { user } = useAuth();
 
-  const [formats, setFormats] = useState<PrefixFormat[]>([
-    {
-      id: "1",
-      name: "Formato Entrada",
-      prefix: "ENT",
-      format: "{PREFIX}-{YYYY}{MM}{DD}-{NNNN}",
-      example: "ENT-20260331-0001",
-      active: true,
-    },
-    {
-      id: "2",
-      name: "Formato Salida",
-      prefix: "SAL",
-      format: "{PREFIX}-{YYYY}{MM}{DD}-{NNNN}",
-      example: "SAL-20260331-0001",
-      active: true,
-    },
-    {
-      id: "3",
-      name: "Formato Despacho",
-      prefix: "DSP",
-      format: "{PREFIX}-{YYYY}-{NNNNNN}",
-      example: "DSP-2026-000001",
-      active: false,
-    },
-  ]);
-
-  const [newFormat, setNewFormat] = useState({
-    name: "",
+  const [formats, setFormats] = useState<PrefixFormat[]>([]);
+  const [newFormat, setFormat] = useState({
+    // name: "",
     prefix: "",
-    format: "{PREFIX}-{YYYY}{MM}{DD}-{NNNN}",
+    format: "",
+    active: false,
   });
+  useEffect(() => {
+    loadConfig();
+    loadFormats();
+  }, []);
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/ticket-prefix/save-config",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Prefijo: newFormat.prefix,
+            Formato: newFormat.format,
+            Activo: false,
+            IdUsuario: user?.id || null,
+          }),
+        });
+      // const data = await res.json();
+      if (res.ok) {
+        alert("Configuración guardada correctamente");
+        await loadConfig()
+        await loadFormats();
+      } else {
+        alert("Error al guardar");
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  }
+
+  const loadConfig = async () => {
+    try {
+      const res = await fetch("/api/ticket-prefix/config");
+      const data = await res.json();
+      if (data) {
+        setFormat({
+          // name: data. || "",
+          prefix: data.Prefijo || "",
+          format: data.Formato || "",
+          active: false,
+        });
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  }
 
   const generateExample = (prefix: string, format: string) => {
-    const now = new Date();
-    return format
-      .replace("{PREFIX}", prefix)
-      .replace("{YYYY}", now.getFullYear().toString())
-      .replace("{MM}", (now.getMonth() + 1).toString().padStart(2, "0"))
-      .replace("{DD}", now.getDate().toString().padStart(2, "0"))
-      .replace("{NNNN}", "0001")
-      .replace("{NNNNNN}", "000001");
+    const correlativo = format.replace(/0/g, "1");
+    return `${prefix}-${correlativo}`;
+  };
+
+  const loadFormats = async () => {
+    try {
+      const res = await fetch("/api/ticket-prefix/all-config");
+      const data = await res.json();
+
+      const mapped = data.map((item: any) => ({
+        id: item.Id,
+        name: "Formato Ticket",
+        prefix: item.Prefijo,
+        format: item.Formato,
+        example: generateExample(item.Prefijo, item.Formato),
+        active: item.Activo,
+      }));
+
+      setFormats(mapped);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const activeTicket = async (id: number) => {
+    try {
+      const res = await fetch("/api/ticket-prefix/activate-config", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ Id: id }),
+      });
+
+      if (res.ok) {
+        await loadConfig();
+      } else {
+        alert("Error al activar");
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
   };
 
   return (
@@ -76,7 +132,7 @@ export function TicketPrefixConfig() {
           Agregar Nuevo Formato
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Nombre del Formato
             </label>
@@ -84,12 +140,12 @@ export function TicketPrefixConfig() {
               type="text"
               value={newFormat.name}
               onChange={(e) =>
-                setNewFormat({ ...newFormat, name: e.target.value })
+                setFormat({ ...newFormat, name: e.target.value })
               }
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ej: Formato Entrada"
             />
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -99,7 +155,7 @@ export function TicketPrefixConfig() {
               type="text"
               value={newFormat.prefix}
               onChange={(e) =>
-                setNewFormat({
+                setFormat({
                   ...newFormat,
                   prefix: e.target.value.toUpperCase(),
                 })
@@ -114,30 +170,22 @@ export function TicketPrefixConfig() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Formato
             </label>
-            <input
-              type="text"
+            <select
               value={newFormat.format}
               onChange={(e) =>
-                setNewFormat({ ...newFormat, format: e.target.value })
+                setFormat({ ...newFormat, format: e.target.value })
               }
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="{PREFIX}-{YYYY}-{NNNN}"
-            />
+            >
+              <option value="0">0</option>
+              <option value="0000">0000</option>
+              <option value="0000000">0000000</option>
+              <option value="0000000000">0000000000</option>
+            </select>
           </div>
         </div>
-
-        {newFormat.prefix && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-slate-600 mb-1">
-              Vista previa del formato:
-            </p>
-            <p className="text-lg font-mono font-bold text-blue-700">
-              {generateExample(newFormat.prefix, newFormat.format)}
-            </p>
-          </div>
-        )}
-
-        <button className="mt-4 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="mt-4 flex bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          onClick={handleSave}>
           <Plus className="w-5 h-5" />
           Agregar Formato
         </button>
@@ -146,7 +194,7 @@ export function TicketPrefixConfig() {
       {/* Format Variables Guide */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
         <h2 className="text-lg font-bold text-slate-800 mb-4">
-          Variables Disponibles
+          Guía de Variables para Formatos
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
@@ -163,55 +211,13 @@ export function TicketPrefixConfig() {
 
           <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
             <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{YYYY}"}
-            </code>
-            <div>
-              <p className="font-medium text-slate-800">Año (4 dígitos)</p>
-              <p className="text-sm text-slate-600">Ejemplo: 2026</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-            <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{MM}"}
-            </code>
-            <div>
-              <p className="font-medium text-slate-800">Mes (2 dígitos)</p>
-              <p className="text-sm text-slate-600">Ejemplo: 03</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-            <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{DD}"}
-            </code>
-            <div>
-              <p className="font-medium text-slate-800">Día (2 dígitos)</p>
-              <p className="text-sm text-slate-600">Ejemplo: 31</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-            <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{NNNN}"}
-            </code>
-            <div>
-              <p className="font-medium text-slate-800">
-                Número secuencial (4 dígitos)
-              </p>
-              <p className="text-sm text-slate-600">Ejemplo: 0001</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-            <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
               {"{NNNNNN}"}
             </code>
             <div>
               <p className="font-medium text-slate-800">
-                Número secuencial (6 dígitos)
+                Formato Digitos
               </p>
-              <p className="text-sm text-slate-600">Ejemplo: 000001</p>
+              <p className="text-sm text-slate-600">Ejemplo: 0000001</p>
             </div>
           </div>
         </div>
@@ -270,8 +276,8 @@ export function TicketPrefixConfig() {
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${format.active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-slate-100 text-slate-700"
                         }`}
                     >
                       {format.active ? "Activo" : "Inactivo"}
@@ -279,11 +285,14 @@ export function TicketPrefixConfig() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
+                      <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" onClick={() => activeTicket(format.id)}>
+                        <Check className="w-5 h-5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" />
+                      </button>
                       <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Save className="w-4 h-4" />
+                        <RefreshCw className="w-5 h-5" />
                       </button>
                       <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </td>

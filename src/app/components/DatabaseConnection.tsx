@@ -1,12 +1,25 @@
 import { useState, useEffect } from "react";
-import { Database, Save, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Database, Save, CheckCircle, XCircle, RefreshCw, Check, Trash2 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
+interface PrefixFormat {
+  id: number;
+  tipoBd: string;
+  servidor: string;
+  puerto: number;
+  nombreBd: string;
+  usuario: string;
+  contrasena: string;
+  fechaCreacion: string;
+  active: boolean;
+  idUsuario: number | null;
+}
 
 export function DatabaseConnection() {
   const { user } = useAuth();
   // Estado para bloquear el formulario 
   const [isLocked, setIsLocked] = useState(false);
+  const [formats, setFormats] = useState<PrefixFormat[]>([]);
 
   const [config, setConfig] = useState({
     dbType: "",
@@ -341,6 +354,95 @@ export function DatabaseConnection() {
             <li>• Use contraseñas seguras</li>
             <li>• Configure backups automáticos</li>
           </ul>
+        </div>
+      </div>
+
+      {/* Existing Formats DB */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="p-6 border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800">
+            Conexiones con Base de Datos Guardadas
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Tipo de Bd
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Servidor
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Puerto
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Nombre de BD
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Usuario
+                </th>
+                <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Password
+                </th>
+                <th>
+                  Creado Por
+                </th>
+                <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Estado
+                </th>
+                <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {formats.map((format) => (
+                <tr key={format.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 font-medium text-slate-800">
+                    {format.id}
+                  </td>
+                  <td className="px-6 py-4">
+                    <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded text-sm font-mono">
+                      {format.tipoBd}
+                    </code>
+                  </td>
+                  <td className="px-6 py-4">
+                    <code className="text-xs text-slate-600 font-mono">
+                      {format.servidor}
+                    </code>
+                  </td>
+                  <td className="px-6 py-4 font-mono text-sm text-slate-800">
+                    {format.nombreBd}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${format.active
+                        ? "bg-green-100 text-green-700"
+                        : "bg-slate-100 text-slate-700"
+                        }`}
+                    >
+                      {format.active ? "Activo" : "Inactivo"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                        <Check className="w-5 h-5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" />
+                      </button>
+                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <RefreshCw className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
