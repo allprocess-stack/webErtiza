@@ -63,6 +63,7 @@ export function DatabaseConnection() {
         alert("Error al guardar");
       }
     } catch (error) {
+      console.error("Error guardando configuración:", error);
       alert("Error de conexión con el backend");
     }
   };
@@ -88,27 +89,73 @@ export function DatabaseConnection() {
     }
   };
 
+  const loadAllConfigs = async () => {
+    try {
+      const res = await fetch("/api/db-config/all");
+      const data = await res.json();
+
+      setFormats(
+        data.map((item: any) => ({
+          id: item.Id,
+          tipoBd: item.TipoBd,
+          servidor: item.Servidor,
+          puerto: item.Puerto,
+          nombreBd: item.NombreBd,
+          usuario: item.Usuario,
+          contrasena: item.Contrasena,
+          fechaCreacion: item.FechaCreacion,
+          active: item.Activo,
+          idUsuario: item.IdUsuario,
+        }))
+      );
+    } catch (error) {
+      console.error("Error cargando configuraciones");
+    }
+  };
+
   useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const res = await fetch("/api/db-config/connection-status");
-        const data = await res.json();
+    const init = async () => {
+      await loadAllConfigs();
 
-        if (data.connected) {
-          setConnectionStatus("connected");
-          setIsLocked(true); // bloquea inputs
-          await loadConfig(); // carga config actualizada
-        } else {
-          setConnectionStatus("disconnected");
-          setIsLocked(false);
-        }
+      const res = await fetch("/api/db-config/connection-status");
+      const data = await res.json();
 
-      } catch (error) {
-        console.error("Error al verificar conexión", error);
+      if (data.connected) {
+        setConnectionStatus("connected");
+        setIsLocked(true);
+        await loadConfig();
+      } else {
+        setConnectionStatus("disconnected");
+        setIsLocked(false);
       }
     };
-    checkConnection();
+
+    init();
   }, []);
+
+  const handleActivate = async (id: number) => {
+    try {
+      const res = await fetch("/api/db-config/activate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ Id: id }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Configuración activada");
+        await loadAllConfigs(); // refresca tabla
+      } else {
+        alert("Error al activar");
+      }
+    } catch (error) {
+      console.error("Error activando configuración:", error);
+      alert("Error con el servidor");
+    }
+  };
 
   const handleConnectionToggle = async () => {
     // DESCONECTAR
@@ -157,6 +204,7 @@ export function DatabaseConnection() {
     } catch (error) {
       setConnectionStatus("disconnected");
       setIsLocked(false);
+      console.error("Error probando conexión:", error);
       alert("Error de conexión con el servidor");
     }
   };
@@ -358,7 +406,7 @@ export function DatabaseConnection() {
       </div>
 
       {/* Existing Formats DB */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="mt-6 bg-white rounded-xl shadow-sm border border-slate-200">
         <div className="p-6 border-b border-slate-200">
           <h2 className="text-xl font-bold text-slate-800">
             Conexiones con Base de Datos Guardadas
@@ -368,6 +416,9 @@ export function DatabaseConnection() {
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Id
+                </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Tipo de Bd
                 </th>
@@ -380,12 +431,12 @@ export function DatabaseConnection() {
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Nombre de BD
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                {/* <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Usuario
                 </th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Password
-                </th>
+                </th> */}
                 <th>
                   Creado Por
                 </th>
@@ -413,23 +464,32 @@ export function DatabaseConnection() {
                       {format.servidor}
                     </code>
                   </td>
+                  <td className="px-6 py-4">
+                    <code className="text-xs text-slate-600 font-mono">
+                      {format.puerto}
+                    </code>
+                  </td>
                   <td className="px-6 py-4 font-mono text-sm text-slate-800">
                     {format.nombreBd}
                   </td>
+                  {/* <td className="px-6 py-4">
+                    <code className="text-xs text-slate-600 font-mono">
+                      {format.usuario}
+                    </code>
+                  </td> */}
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${format.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-700"
-                        }`}
-                    >
+                    <span className={`px-2 py-1 rounded text-xs ${format.active ? "bg-green-100 text-green-700" : "bg-gray-100"
+                      }`}>
                       {format.active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                        <Check className="w-5 h-5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" />
+                      <button
+                        onClick={() => handleActivate(format.id)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      >
+                        <Check className="w-5 h-5" />
                       </button>
                       <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                         <RefreshCw className="w-5 h-5" />

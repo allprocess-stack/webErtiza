@@ -4,10 +4,11 @@ import { useAuth } from "./AuthContext";
 
 interface PrefixFormat {
   id: number;
-  name: string;
   format: string;
-  example: string;
+  prefix: string;
+  fechaCreacion?: string;
   active: boolean;
+  idusuario?: number;
 }
 
 export function TicketPrefixConfig() {
@@ -258,7 +259,7 @@ export function TicketPrefixConfig() {
               {formats.map((format) => (
                 <tr key={format.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 font-medium text-slate-800">
-                    {format.name}
+                    {format.id}
                   </td>
                   <td className="px-6 py-4">
                     <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded text-sm font-mono">
@@ -271,7 +272,7 @@ export function TicketPrefixConfig() {
                     </code>
                   </td>
                   <td className="px-6 py-4 font-mono text-sm text-slate-800">
-                    {format.example}
+                    {format.fechaCreacion}
                   </td>
                   <td className="px-6 py-4">
                     <span
