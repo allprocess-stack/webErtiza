@@ -203,8 +203,8 @@ export function AdminPanel() {
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.role === "admin"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-blue-100 text-blue-700"
+                        ? "bg-purple-100 text-purple-700"
+                        : "bg-blue-100 text-blue-700"
                         }`}
                     >
                       {user.role === "admin" ? (
@@ -219,8 +219,8 @@ export function AdminPanel() {
                     <button
                       onClick={() => handleToggleStatus(user.id)}
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
                         }`}
                     >
                       {user.status === "active" ? (
@@ -264,12 +264,20 @@ export function AdminPanel() {
             <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Nombre Completo
+                  Nombres
                 </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nombre del usuario"
+                />
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Apellidos
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Apellido del usuario"
                 />
               </div>
               <div>
