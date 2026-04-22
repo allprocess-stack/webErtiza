@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Database, Save, CheckCircle, XCircle, RefreshCw, Check, Trash2 } from "lucide-react";
+import { Database, Save, CheckCircle, XCircle, RefreshCw, CircleCheck, SquarePen } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
 interface PrefixFormat {
@@ -19,10 +19,11 @@ export function DatabaseConnection() {
   const { user } = useAuth();
   // Estado para bloquear el formulario 
   const [isLocked, setIsLocked] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [formats, setFormats] = useState<PrefixFormat[]>([]);
 
   const [config, setConfig] = useState({
-    dbType: "",
+    dbType: "MYSQL",
     host: "",
     port: "",
     database: "",
@@ -31,14 +32,29 @@ export function DatabaseConnection() {
     useSSL: false,
   });
 
+  // Estado para manejar el estado de conexión a la base de datos
   const [connectionStatus, setConnectionStatus] = useState<
     "connected" | "disconnected" | "connecting" | "testing"
   >("disconnected");
 
+  // Función para reiniciar el formulario a su estado inicial y salir del modo edición
+  const resetForm = () => {
+    setEditingId(null);
+    setConfig({
+      dbType: "MYSQL",
+      host: "",
+      port: "",
+      database: "",
+      username: "",
+      password: "",
+      useSSL: false,
+    });
+  };
 
+  // Función para guardar una nueva configuración en la base de datos
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/db-config/save-config", {
+      const res = await fetch("http://localhost:3000/api/db-config/save-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,11 +62,12 @@ export function DatabaseConnection() {
         body: JSON.stringify({
           TipoBd: config.dbType,
           Servidor: config.host,
-          Puerto: config.port,
+          Puerto: Number(config.port),
           NombreBd: config.database,
           Usuario: config.username,
           Contrasena: config.password,
           IdUsuario: user.nombre === "root" ? null : 1, // luego lo haces dinámico
+          Activo: true,
         }),
       });
 
@@ -58,7 +75,7 @@ export function DatabaseConnection() {
 
       if (data.success) {
         alert("Configuración guardada correctamente");
-        await loadConfig();
+        await loadAllConfigs();
       } else {
         alert("Error al guardar");
       }
@@ -68,44 +85,134 @@ export function DatabaseConnection() {
     }
   };
 
+  // Función para llenar el formulario con los datos de la fila seleccionada y activar el modo edición
+  const handleEdit = (format: PrefixFormat) => {
+    // Llena el formulario con los datos de la fila
+    setConfig({
+      dbType: format.tipoBd,
+      host: format.servidor,
+      port: format.puerto.toString(),
+      database: format.nombreBd,
+      username: format.usuario,
+      password: format.contrasena,
+      useSSL: false,
+    });
+
+    // Guarda el ID que estamos editando
+    setEditingId(format.id);
+
+    // Desbloquea el formulario por si estaba bloqueado
+    setIsLocked(false);
+  };
+
+  // Función para actualizar la configuración existente (cuando editingId no es null)
+  const updateConfig = async () => {
+    if (!editingId) {
+      alert("No hay un registro seleccionado para actualizar");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/db-config/update-config/${editingId}`, {
+        method: "POST", // O PUT si tu backend lo prefiere
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          TipoBd: config.dbType,
+          Servidor: config.host,
+          Puerto: Number(config.port),
+          NombreBd: config.database,
+          Usuario: config.username,
+          Contrasena: config.password,
+          IdUsuario: user.nombre === "root" ? null : 1,
+          Activo: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("Configuración actualizada correctamente");
+
+        // REINICIO DE ESTADOS
+        setEditingId(null);
+        setConfig({ // Opcional: limpiar campos tras editar
+          dbType: "MYSQL",
+          host: "",
+          port: "",
+          database: "",
+          username: "",
+          password: "",
+          useSSL: false,
+        });
+
+        await loadAllConfigs();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error actualizando configuración:", error);
+      alert("Error de conexión con el backend");
+    }
+  };
+
+  // Función para el botón de "Guardar/Actualizar"
+  const handleClick = () => {
+    if (editingId) {
+      // Si ya estamos editando, ejecuta la actualización
+      updateConfig();
+    } else {
+      // Si no se esta editando, guarda uno nuevo
+      handleSave();
+    }
+  };
+
+  // Función para el botón de "Limpiar/Nuevo" (el segundo click que mencionas)
+  const handleReset = () => {
+    resetForm();
+    alert("Formulario reiniciado: Modo Guardar activado");
+  };
+
+  // Carga la configuración activa al iniciar la página
   const loadConfig = async () => {
     try {
-      const res = await fetch("/api/db-config/config");
+      const res = await fetch("http://localhost:3000/api/db-config/config");
       const data = await res.json();
       if (data) {
         setConfig({
-          dbType: data.TipoBd,
-          host: data.Servidor,
-          port: data.Puerto,
-          database: data.NombreBd,
-          username: data.Usuario,
-          password: data.Contrasena,
+          dbType: data.tipobd,
+          host: data.servidor,
+          port: data.puerto,
+          database: data.nombrebd,
+          username: data.usuario,
+          password: data.contrasena,
           useSSL: false,
         });
       }
-
+      console.log("formats:", formats);
     } catch (error) {
       console.error("Error cargando config");
     }
   };
 
+  // Carga todas las configuraciones guardadas para mostrarlas en la tabla
   const loadAllConfigs = async () => {
     try {
-      const res = await fetch("/api/db-config/all");
+      const res = await fetch("http://localhost:3000/api/db-config/all-config");
       const data = await res.json();
 
       setFormats(
         data.map((item: any) => ({
-          id: item.Id,
-          tipoBd: item.TipoBd,
-          servidor: item.Servidor,
-          puerto: item.Puerto,
-          nombreBd: item.NombreBd,
-          usuario: item.Usuario,
-          contrasena: item.Contrasena,
-          fechaCreacion: item.FechaCreacion,
-          active: item.Activo,
-          idUsuario: item.IdUsuario,
+          id: item.id,
+          tipoBd: item.tipobd,
+          servidor: item.servidor,
+          puerto: item.puerto,
+          nombreBd: item.nombrebd,
+          usuario: item.usuario,
+          contrasena: item.contrasena,
+          fechaCreacion: item.fechaCreacion,
+          active: item.activo,
+          idUsuario: item.idusuario,
         }))
       );
     } catch (error) {
@@ -113,11 +220,12 @@ export function DatabaseConnection() {
     }
   };
 
+  // Al cargar el componente, verifica el estado de conexión y carga la configuración activa si está conectado
   useEffect(() => {
     const init = async () => {
       await loadAllConfigs();
 
-      const res = await fetch("/api/db-config/connection-status");
+      const res = await fetch("http://localhost:3000/api/db-config/connection-status");
       const data = await res.json();
 
       if (data.connected) {
@@ -133,9 +241,10 @@ export function DatabaseConnection() {
     init();
   }, []);
 
+  // Función para activar una configuración específica desde la tabla
   const handleActivate = async (id: number) => {
     try {
-      const res = await fetch("/api/db-config/activate", {
+      const res = await fetch("http://localhost:3000/api/db-config/activate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -157,6 +266,7 @@ export function DatabaseConnection() {
     }
   };
 
+  // Función para desconectar a la base de datos o probar la conexión dependiendo del estado actual
   const handleConnectionToggle = async () => {
     // DESCONECTAR
     if (connectionStatus === "connected") {
@@ -272,11 +382,11 @@ export function DatabaseConnection() {
               onChange={(e) => setConfig({ ...config, dbType: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="MySQL">MySQL</option>
-              <option value="PostgreSQL">PostgreSQL</option>
+              <option value="MYSQL">MySQL</option>
+              <option value="POSTGRESQL">PostgreSQL</option>
               <option value="SQL Server">SQL Server</option>
-              <option value="Oracle">Oracle</option>
-              <option value="SQLite">SQLite</option>
+              {/* <option value="Oracle">Oracle</option>
+              <option value="SQLite">SQLite</option> */}
             </select>
           </div>
 
@@ -359,12 +469,32 @@ export function DatabaseConnection() {
 
         {/* Actions */}
         <div className="mt-6 flex gap-4">
+
           <button
-            onClick={handleSave}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={handleClick}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white transition-all shadow-md ${editingId
+              ? "bg-orange-600 hover:bg-orange-700 ring-2 ring-orange-300"
+              : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
-            Guardar Configuración
+            {editingId ? (
+              <> <RefreshCw className="w-5 h-5 animate-spin-slow" /> Actualizar Configuración </>
+            ) : (
+              <> <Save className="w-5 h-5" /> Guardar Configuración </>
+            )}
           </button>
+
+          {/* Este botón aparece solo cuando estás editando para permitirte volver a "Guardar" */}
+          {editingId && (
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+              title="Cancelar edición y limpiar"
+            >
+              Limpiar / Nuevo
+            </button>
+          )}
+
           <button
             onClick={handleConnectionToggle}
             className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-colors ${connectionStatus === "connected"
@@ -472,31 +602,31 @@ export function DatabaseConnection() {
                   <td className="px-6 py-4 font-mono text-sm text-slate-800">
                     {format.nombreBd}
                   </td>
-                  {/* <td className="px-6 py-4">
-                    <code className="text-xs text-slate-600 font-mono">
-                      {format.usuario}
-                    </code>
-                  </td> */}
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${format.active ? "bg-green-100 text-green-700" : "bg-gray-100"
-                      }`}>
+                    {format.idUsuario === null ? "MASTER" : format.idUsuario}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs ${format.active ? "bg-green-100 text-green-700" : "bg-gray-100"}`}>
                       {format.active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
+                      {/* botones */}
+                      <button onClick={() => handleActivate(format.id)} className="text-green-500 hover:text-green-700">
+                        <CircleCheck className="w-6 h-6" />
+                      </button>
                       <button
-                        onClick={() => handleActivate(format.id)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        onClick={() => handleEdit(format)} // Pasamos todo el objeto de la fila
+                        className="text-blue-500 hover:text-blue-700"
+                        title="Editar configuración"
                       >
-                        <Check className="w-5 h-5" />
+                        <SquarePen className="w-6 h-6" />
                       </button>
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <RefreshCw className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      {/* BOTON ELIMINAR REGISTRO DE CONEXION BD - NO IMPLEMENTADO */}
+                      {/* <button onClick={() => handleDelete(format.id)} className="text-red-500 hover:text-red-700">
+                        <Trash className="w-6 h-6" />
+                      </button> */}
                     </div>
                   </td>
                 </tr>

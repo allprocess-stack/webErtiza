@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Users,
   UserPlus,
@@ -25,40 +25,7 @@ export function AdminPanel() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      name: "Juan Pérez",
-      email: "juan@empresa.com",
-      role: "admin",
-      status: "active",
-      lastLogin: "2026-03-30 10:30",
-    },
-    {
-      id: "2",
-      name: "María García",
-      email: "maria@empresa.com",
-      role: "worker",
-      status: "active",
-      lastLogin: "2026-03-30 09:15",
-    },
-    {
-      id: "3",
-      name: "Carlos López",
-      email: "carlos@empresa.com",
-      role: "worker",
-      status: "active",
-      lastLogin: "2026-03-29 16:45",
-    },
-    {
-      id: "4",
-      name: "Ana Martínez",
-      email: "ana@empresa.com",
-      role: "worker",
-      status: "inactive",
-      lastLogin: "2026-03-25 14:20",
-    },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -66,23 +33,96 @@ export function AdminPanel() {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteUser = (id: string) => {
-    if (confirm("¿Está seguro de eliminar este usuario?")) {
-      setUsers(users.filter((user) => user.id !== id));
+  useEffect(() => {
+    fetchUsers();
+
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/admin/all-configs");
+      const data = await res.json();
+
+      const mappedUsers = data.map((u: any) => ({
+        id: u.id,
+        name: `${u.nombre} ${u.apellido}`,
+        email: u.gmail,
+        role: u.rol === "admin" ? "admin" : "worker",
+        status: u.activo ? "active" : "inactive",
+        lastLogin: "—",
+      }));
+
+      setUsers(mappedUsers);
+    } catch (error) {
+      console.error("Error cargando usuarios:", error);
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id
-          ? {
-            ...user,
-            status: user.status === "active" ? "inactive" : "active",
-          }
-          : user
-      )
-    );
+  const handleCreateUser = async (e: any) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    const formData = new FormData(form);
+
+    const newUser = {
+      Nombre: formData.get("nombre"),
+      Apellido: formData.get("apellido"),
+      Gmail: formData.get("gmail"),
+      Rol: formData.get("rol"),
+      Password: formData.get("password"),
+      Usuario: formData.get("gmail"),
+      Activo: true,
+    };
+
+    try {
+      await fetch("http://localhost:3000/api/admin/save-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
+      console.log(newUser);
+      fetchUsers(); // refrescar lista
+      setShowAddModal(false);
+    } catch (error) {
+      console.error("Error creando usuario:", error);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!confirm("¿Eliminar usuario?")) return;
+
+    try {
+      await fetch(`http://localhost:3000/api/admin/delete-config/${id}`, {
+        method: "DELETE",
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error eliminando:", error);
+    }
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    const user = users.find(u => u.id === id);
+
+    try {
+      await fetch(`http://localhost:3000/api/admin/activate-config/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Activo: user?.status !== "active",
+        }),
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error cambiando estado:", error);
+    }
   };
 
   return (
@@ -261,13 +301,14 @@ export function AdminPanel() {
             <h2 className="text-2xl font-bold text-slate-800 mb-4">
               Agregar Nuevo Usuario
             </h2>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleCreateUser}>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Nombres
                 </label>
                 <input
                   type="text"
+                  name="nombre"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nombre del usuario"
                 />
@@ -275,6 +316,7 @@ export function AdminPanel() {
                   Apellidos
                 </label>
                 <input
+                  name="apellido"
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Apellido del usuario"
@@ -285,6 +327,7 @@ export function AdminPanel() {
                   Correo Electrónico
                 </label>
                 <input
+                  name="gmail"
                   type="email"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="correo@empresa.com"
@@ -294,8 +337,8 @@ export function AdminPanel() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Rol
                 </label>
-                <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="worker">Trabajador</option>
+                <select name="rol" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="worker" >Trabajador</option>
                   <option value="admin">Administrador</option>
                 </select>
               </div>
@@ -304,6 +347,7 @@ export function AdminPanel() {
                   Contraseña Temporal
                 </label>
                 <input
+                  name="password"
                   type="password"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Contraseña"

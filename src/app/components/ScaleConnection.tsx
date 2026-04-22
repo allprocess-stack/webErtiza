@@ -19,7 +19,7 @@ export function ScaleConnection() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/scale-config/save-config",
+      const res = await fetch("http://localhost:3000/api/scale-config/save-config",
         {
           method: "POST",
           headers: {
@@ -46,7 +46,7 @@ export function ScaleConnection() {
 
   const loadConfig = async () => {
     try {
-      const res = await fetch("/api/scale-config/config");
+      const res = await fetch("http://localhost:3000/api/scale-config/config");
       const data = await res.json();
       if (data) {
         setConfig({
@@ -81,7 +81,7 @@ export function ScaleConnection() {
 
   const handleConnectionToggle = async () => {
     if (connectionStatus === "connected") {
-      await fetch("/api/scale-config/disconnect", { method: "POST" });
+      await fetch("http://localhost:3000/api/scale-config/disconnect", { method: "POST" });
 
       setConnectionStatus("disconnected");
       setIsLocked(false);
@@ -91,7 +91,7 @@ export function ScaleConnection() {
     setConnectionStatus("testing");
 
     try {
-      const res = await fetch("/api/scale-config/test-connection", {
+      const res = await fetch("http://localhost:3000/api/scale-config/test-connection", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
