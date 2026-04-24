@@ -16,7 +16,7 @@ interface User {
   name: string;
   lastname: string;
   user: string;
-  role: "ADMIN" | "WORKER" | "MASTER";
+  rol: "ADMIN" | "WORKER" | "MASTER";
   email: string;
   password: string;
   status: "active" | "inactive";
@@ -24,7 +24,7 @@ interface User {
 }
 
 export function AdminPanel() {
-  const { user } = useAuth();
+  const { user, canEdit, isMaster } = useAuth();
 
   // 
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +41,11 @@ export function AdminPanel() {
     password: "",
     activeUser: false,
   });
-
+  const canEditUser = (currentUserRole: string, targetRole: string) => {
+    if (currentUserRole === "MASTER") return true;
+    if (currentUserRole === "ADMIN" && targetRole === "WORKER") return true;
+    return false;
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -74,8 +78,6 @@ export function AdminPanel() {
     const form = e.currentTarget;
 
     const formData = new FormData(form);
-
-
     const newUser = {
       Nombre: String(formData.get("nombre") || ""),
       Apellido: String(formData.get("apellido") || ""),
@@ -125,7 +127,7 @@ export function AdminPanel() {
       name: format.name,
       lastname: format.lastname,
       user: format.user,
-      rol: format.role,
+      rol: format.rol,
       gmail: format.email,
       password: format.password,
       activeUser: format.status === "active",
@@ -148,7 +150,7 @@ export function AdminPanel() {
         id: u.id,
         name: `${u.nombre} ${u.apellido}`,
         email: u.gmail,
-        role: u.rol === "admin" ? "admin" : "worker",
+        rol: u.rol === "ADMIN" ? "ADMIN" : "WORKER",
         status: u.activo ? "active" : "inactive",
         lastLogin: "—",
       }));
@@ -158,7 +160,6 @@ export function AdminPanel() {
       console.error("Error cargando usuarios:", error);
     }
   };
-
 
   // Eliminar usuario (solo admin) y cambiar estado (admin y worker)
   const handleDeleteUser = async (id: string) => {
@@ -186,7 +187,7 @@ export function AdminPanel() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          Activo: user?.status !== "active",
+          // Activo: user?.status !== "active",
         }),
       });
 
@@ -225,7 +226,7 @@ export function AdminPanel() {
             <div>
               <p className="text-sm text-slate-600">Administradores</p>
               <p className="text-2xl font-bold text-slate-800">
-                {users.filter((u) => u.role === "ADMIN").length}
+                {users.filter((u) => u.rol === "ADMIN").length}
               </p>
             </div>
             <Shield className="w-8 h-8 text-purple-600" />
@@ -237,7 +238,7 @@ export function AdminPanel() {
             <div>
               <p className="text-sm text-slate-600">Trabajadores</p>
               <p className="text-2xl font-bold text-slate-800">
-                {users.filter((u) => u.role === "WORKER").length}
+                {users.filter((u) => u.rol === "WORKER").length}
               </p>
             </div>
             <Users className="w-8 h-8 text-green-600" />
@@ -313,17 +314,17 @@ export function AdminPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.role === "ADMIN"
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.rol === "ADMIN"
                         ? "bg-purple-100 text-purple-700"
                         : "bg-blue-100 text-blue-700"
                         }`}
                     >
-                      {user.role === "ADMIN" ? (
+                      {user.rol === "ADMIN" ? (
                         <Shield className="w-3 h-3" />
                       ) : (
                         <Users className="w-3 h-3" />
                       )}
-                      {user.role === "ADMIN" ? "Administrador" : "Trabajador"}
+                      {user.rol === "ADMIN" ? "Administrador" : "Trabajador"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -347,8 +348,11 @@ export function AdminPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit className="w-4 h-4" />
+                      <button
+                        disabled={!canEdit(user.rol)}
+                        onClick={() => handleEdit(user)}
+                      >
+                        Editar
                       </button>
                       <button
                         // onClick={() => handleDeleteUser(user.id)}
@@ -419,7 +423,9 @@ export function AdminPanel() {
                 </label>
                 <select name="rol" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="WORKER" >Trabajador</option>
-                  <option value="ADMIN">Administrador</option>
+                  {isMaster && (
+                    <><option value="ADMIN">Administrador</option><option value="MASTER">Master</option></>
+                  )}
                 </select>
               </div>
               <div>
