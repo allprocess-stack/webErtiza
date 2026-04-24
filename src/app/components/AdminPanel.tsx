@@ -12,10 +12,13 @@ import {
 import { useAuth } from "./AuthContext";
 
 interface User {
-  id: string;
+  id: number;
   name: string;
+  lastname: string;
+  user: string;
+  role: "ADMIN" | "WORKER" | "MASTER";
   email: string;
-  role: "admin" | "worker";
+  password: string;
   status: "active" | "inactive";
   lastLogin: string;
 }
@@ -23,9 +26,22 @@ interface User {
 export function AdminPanel() {
   const { user } = useAuth();
 
+  // 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [configs, setConfig] = useState({
+    name: "",
+    lastname: "",
+    user: "",
+    rol: "",
+    gmail: "",
+    password: "",
+    activeUser: false,
+  });
+
 
   const filteredUsers = users.filter(
     (user) =>
@@ -34,13 +50,98 @@ export function AdminPanel() {
   );
 
   useEffect(() => {
-    fetchUsers();
+    getAllUsers();
 
   }, []);
 
-  const fetchUsers = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setConfig({
+      name: "",
+      lastname: "",
+      user: "",
+      rol: "",
+      gmail: "",
+      password: "",
+      activeUser: false,
+    });
+  }
+
+  // Solo los administradores pueden crear, eliminar o cambiar el estado de otros usuarios
+  const handleCreateUser = async (e: any) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    const formData = new FormData(form);
+
+
+    const newUser = {
+      Nombre: String(formData.get("nombre") || ""),
+      Apellido: String(formData.get("apellido") || ""),
+      Gmail: String(formData.get("gmail") || ""),
+      Rol: String(formData.get("rol") || ""),
+      Password: String(formData.get("password") || ""),
+      Usuario: String(formData.get("usuario") || ""),
+      Activo: true,
+    };
+    if (
+      !newUser.Nombre ||
+      !newUser.Apellido ||
+      !newUser.Usuario ||
+      !newUser.Gmail ||
+      !newUser.Password
+    ) {
+      alert("Completa todos los campos");
+      return;
+    }
     try {
-      const res = await fetch("http://localhost:3000/api/admin/all-configs");
+      const res = await fetch("http://localhost:3000/api/admin/save-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
+      const data = await res.json();
+
+      console.log("Enviando:", newUser);
+      if (data.success) {
+        alert("Usuario creado exitosamente");
+      } else {
+        alert("Error al guardar");
+      }
+      getAllUsers(); // refrescar lista
+      setShowAddModal(false);
+    } catch (error) {
+      console.error("Error creando usuario:", error);
+      alert("Error de conexión con el backend, handleCreateUser");
+    }
+  };
+
+  const handleEdit = (format: User) => {
+    // Llena el formulario con los datos de la fila
+    setConfig({
+      name: format.name,
+      lastname: format.lastname,
+      user: format.user,
+      rol: format.role,
+      gmail: format.email,
+      password: format.password,
+      activeUser: format.status === "active",
+    });
+
+    // Guarda el ID que estamos editando
+    setEditingId(format.id);
+
+    // Desbloquea el formulario por si estaba bloqueado
+    setIsLocked(false);
+  };
+
+  // Todos los usuarios (admin y worker) pueden ver la lista de usuarios
+  const getAllUsers = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/admin/all-config");
       const data = await res.json();
 
       const mappedUsers = data.map((u: any) => ({
@@ -58,39 +159,8 @@ export function AdminPanel() {
     }
   };
 
-  const handleCreateUser = async (e: any) => {
-    e.preventDefault();
 
-    const form = e.currentTarget;
-
-    const formData = new FormData(form);
-
-    const newUser = {
-      Nombre: formData.get("nombre"),
-      Apellido: formData.get("apellido"),
-      Gmail: formData.get("gmail"),
-      Rol: formData.get("rol"),
-      Password: formData.get("password"),
-      Usuario: formData.get("gmail"),
-      Activo: true,
-    };
-
-    try {
-      await fetch("http://localhost:3000/api/admin/save-config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newUser),
-      });
-      console.log(newUser);
-      fetchUsers(); // refrescar lista
-      setShowAddModal(false);
-    } catch (error) {
-      console.error("Error creando usuario:", error);
-    }
-  };
-
+  // Eliminar usuario (solo admin) y cambiar estado (admin y worker)
   const handleDeleteUser = async (id: string) => {
     if (!confirm("¿Eliminar usuario?")) return;
 
@@ -99,14 +169,15 @@ export function AdminPanel() {
         method: "DELETE",
       });
 
-      fetchUsers();
+      getAllUsers();
     } catch (error) {
       console.error("Error eliminando:", error);
     }
   };
 
-  const handleToggleStatus = async (id: string) => {
-    const user = users.find(u => u.id === id);
+  // Cambiar estado de usuario (admin y worker) - activa o inactiva el usuario
+  const activeUser = async (id: string) => {
+    // const user = users.find(u => u.id === id);
 
     try {
       await fetch(`http://localhost:3000/api/admin/activate-config/${id}`, {
@@ -119,7 +190,7 @@ export function AdminPanel() {
         }),
       });
 
-      fetchUsers();
+      getAllUsers();
     } catch (error) {
       console.error("Error cambiando estado:", error);
     }
@@ -154,7 +225,7 @@ export function AdminPanel() {
             <div>
               <p className="text-sm text-slate-600">Administradores</p>
               <p className="text-2xl font-bold text-slate-800">
-                {users.filter((u) => u.role === "admin").length}
+                {users.filter((u) => u.role === "ADMIN").length}
               </p>
             </div>
             <Shield className="w-8 h-8 text-purple-600" />
@@ -166,7 +237,7 @@ export function AdminPanel() {
             <div>
               <p className="text-sm text-slate-600">Trabajadores</p>
               <p className="text-2xl font-bold text-slate-800">
-                {users.filter((u) => u.role === "worker").length}
+                {users.filter((u) => u.role === "WORKER").length}
               </p>
             </div>
             <Users className="w-8 h-8 text-green-600" />
@@ -242,22 +313,22 @@ export function AdminPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.role === "admin"
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.role === "ADMIN"
                         ? "bg-purple-100 text-purple-700"
                         : "bg-blue-100 text-blue-700"
                         }`}
                     >
-                      {user.role === "admin" ? (
+                      {user.role === "ADMIN" ? (
                         <Shield className="w-3 h-3" />
                       ) : (
                         <Users className="w-3 h-3" />
                       )}
-                      {user.role === "admin" ? "Administrador" : "Trabajador"}
+                      {user.role === "ADMIN" ? "Administrador" : "Trabajador"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => handleToggleStatus(user.id)}
+                      // onClick={() => activeUser(Number(user.id))}
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === "active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -280,7 +351,7 @@ export function AdminPanel() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
+                        // onClick={() => handleDeleteUser(user.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -322,6 +393,15 @@ export function AdminPanel() {
                   placeholder="Apellido del usuario"
                 />
               </div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Usuario
+              </label>
+              <input
+                type="text"
+                name="usuario"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Usuario para iniciar sesión"
+              />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Correo Electrónico
@@ -338,8 +418,8 @@ export function AdminPanel() {
                   Rol
                 </label>
                 <select name="rol" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="worker" >Trabajador</option>
-                  <option value="admin">Administrador</option>
+                  <option value="WORKER" >Trabajador</option>
+                  <option value="ADMIN">Administrador</option>
                 </select>
               </div>
               <div>
