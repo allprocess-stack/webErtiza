@@ -8,6 +8,8 @@ import {
   Search,
   CheckCircle,
   XCircle,
+  UserPen,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
@@ -79,20 +81,20 @@ export function AdminPanel() {
 
     const formData = new FormData(form);
     const newUser = {
-      Nombre: String(formData.get("nombre") || ""),
-      Apellido: String(formData.get("apellido") || ""),
-      Gmail: String(formData.get("gmail") || ""),
-      Rol: String(formData.get("rol") || ""),
-      Password: String(formData.get("password") || ""),
-      Usuario: String(formData.get("usuario") || ""),
-      Activo: true,
+      nombre: String(formData.get("nombre") || ""),
+      apellido: String(formData.get("apellido") || ""),
+      gmail: String(formData.get("gmail") || ""),
+      rol: String(formData.get("rol") || ""),
+      password: String(formData.get("password") || ""),
+      usuario: String(formData.get("usuario") || ""),
+      activo: true,
     };
     if (
-      !newUser.Nombre ||
-      !newUser.Apellido ||
-      !newUser.Usuario ||
-      !newUser.Gmail ||
-      !newUser.Password
+      !newUser.nombre ||
+      !newUser.apellido ||
+      !newUser.usuario ||
+      !newUser.gmail ||
+      !newUser.password
     ) {
       alert("Completa todos los campos");
       return;
@@ -283,30 +285,28 @@ export function AdminPanel() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full text-sm text-slate-600 align-middle text-center">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Usuario
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                <th className="px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Rol
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                <th className="px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Estado
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
-                  Último Acceso
-                </th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                <th className="px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+
+            <tbody className="divide-y divide-slate-200 text-center">
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
+                  <td className="text-left px-6 py-4">
                     <div>
                       <p className="font-medium text-slate-800">{user.name}</p>
                       <p className="text-sm text-slate-500">{user.email}</p>
@@ -328,8 +328,7 @@ export function AdminPanel() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      // onClick={() => activeUser(Number(user.id))}
+                    <p
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === "active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -341,24 +340,37 @@ export function AdminPanel() {
                         <XCircle className="w-3 h-3" />
                       )}
                       {user.status === "active" ? "Activo" : "Inactivo"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {user.lastLogin}
+                    </p>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <button className="p-2">
+                        <ShieldCheck
+                          className={`w-6 h-6 ${canEdit(user.status)
+                            ? "text-green-600 hover:bg-green-50"
+                            : "text-red-600 cursor-not-allowed"
+                            }`}
+                        />
+                      </button>
                       <button
+                        className="p-2"
                         disabled={!canEdit(user.rol)}
                         onClick={() => handleEdit(user)}
                       >
-                        Editar
+                        <UserPen
+                          className={`w-6 h-6 ${canEdit(user.rol)
+                            ? "text-blue-600 hover:bg-blue-50"
+                            : "text-slate-400 cursor-not-allowed"
+                            }`}
+                        />
                       </button>
-                      <button
-                        // onClick={() => handleDeleteUser(user.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2
+                          className={`w-6 h-6 ${canEdit(user.rol)
+                            ? "text-red-600 hover:bg-red-50"
+                            : "text-slate-400 cursor-not-allowed"
+                            }`}
+                        />
                       </button>
                     </div>
                   </td>
@@ -366,6 +378,7 @@ export function AdminPanel() {
               ))}
             </tbody>
           </table>
+
         </div>
       </div>
 

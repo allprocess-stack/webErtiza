@@ -34,12 +34,15 @@ export function Layout() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
+
   useEffect(() => {
+    if (user === undefined) return; // espera inicial
+
     if (!user) {
       navigate("/login");
     } else {
+      setUserName(user.usuario);
       setUserRole(user.rol);
-      setUserName(user.nombre);
     }
   }, [user]);
 
@@ -93,7 +96,20 @@ export function Layout() {
     { path: "/settings", icon: Settings, label: "Mi Configuración" },
   ];
 
-  const menuItems = userRole === "admin" ? adminMenuItems : workerMenuItems;
+  const menuItems = userRole ? getMenuItemsByRole(userRole) : [];
+
+  function getMenuItemsByRole(role: string) {
+    switch (role) {
+      case "MASTER":
+      case "ADMIN":
+        return adminMenuItems;
+      case "WORKER":
+        return workerMenuItems;
+      default:
+        return [];
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-slate-100 flex">

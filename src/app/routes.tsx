@@ -33,8 +33,8 @@ function DashboardRouter() {
 
   if (!user) return <Navigate to="/login" />;
 
-  if (user.rol === "admin") return <Dashboard />;
-  if (user.rol === "worker") return <WorkerDashboard />;
+  if (user.rol === "ADMIN" || user.rol === "MASTER") return <Dashboard />;
+  if (user.rol === "WORKER") return <WorkerDashboard />;
   return <Navigate to="/login" />;
 }
 

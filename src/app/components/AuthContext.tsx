@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Variable de contexto para autenticación
 const AuthContext = createContext<any>(null);
 
 export const AuthProvider = ({ children }: any) => {
@@ -21,8 +20,29 @@ export const AuthProvider = ({ children }: any) => {
     localStorage.clear();
   };
 
+  // 🔥 HELPERS DE ROLES
+  const isMaster = user?.rol === "MASTER";
+  const isAdmin = user?.rol === "ADMIN";
+  const isWorker = user?.rol === "WORKER";
+
+  const canEdit = (targetRole: string) => {
+    if (isMaster) return true;
+    if (isAdmin && targetRole === "WORKER") return true;
+    return false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isMaster,
+        isAdmin,
+        isWorker,
+        canEdit,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

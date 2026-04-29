@@ -12,42 +12,52 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Usuario Maestro para configuración inicial
-    if (username === "root" && password === "allprocess") {
-      login({
-        id: null,
-        nombre: "root",
-        rol: "admin",
-        token: "fake-token",
-      });
 
-      navigate("/");
+    // MASTER local
+    if (username === "root" && password === "allprocess") {
+      const userData = {
+        id: null,
+        usuario: "root",
+        rol: "MASTER",
+      };
+
+      login(userData);
+
+      navigate("/"); // ruta admin
       return;
     }
+
     try {
       const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ usuario: username, password: password }),
+        body: JSON.stringify({ usuario: username, password }),
       });
+
       const data = await response.json();
-      // Guarda Datos
-      login({
+
+      const userData = {
         id: data.user.id,
-        nombre: data.user.usuario,
+        usuario: data.user.usuario,
         rol: data.user.rol,
-        token: data.token,
-      });
-      // Redirigir
-      navigate("/");
+      };
+
+      login(userData);
+
+      // REDIRECCIÓN POR ROL
+      if (userData.rol === "MASTER" || userData.rol === "ADMIN") {
+        navigate("/dashboard");
+      } else {
+        navigate("/worker");
+      }
+
     } catch (error) {
-      console.error("Error during login:", error);
-      alert("Credenciales incorrectas o no se pudo conectar con el servidor");
+      console.error(error);
+      alert("Error en login");
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
