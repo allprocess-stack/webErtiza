@@ -60,14 +60,14 @@ export function DatabaseConnection() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          TipoBd: config.dbType,
-          Servidor: config.host,
-          Puerto: Number(config.port),
-          NombreBd: config.database,
-          Usuario: config.username,
-          Contrasena: config.password,
-          IdUsuario: user.nombre === "root" ? null : 1, // luego lo haces dinámico
-          Activo: true,
+          tipobd: config.dbType,
+          servidor: config.host,
+          puerto: Number(config.port),
+          nombrebd: config.database,
+          usuario: config.username,
+          contrasena: config.password,
+          idusuario: user.nombre === "root" ? null : 1, // luego lo haces dinámico
+          activo: true,
         }),
       });
 
@@ -119,14 +119,14 @@ export function DatabaseConnection() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          TipoBd: config.dbType,
-          Servidor: config.host,
-          Puerto: Number(config.port),
-          NombreBd: config.database,
-          Usuario: config.username,
-          Contrasena: config.password,
-          IdUsuario: user.nombre === "root" ? null : 1,
-          Activo: true,
+          tipobd: config.dbType,
+          servidor: config.host,
+          puerto: Number(config.port),
+          nombrebd: config.database,
+          usuario: config.username,
+          contrasena: config.password,
+          idusuario: user.nombre === "root" ? null : 1,
+          activo: true,
         }),
       });
 
@@ -210,7 +210,7 @@ export function DatabaseConnection() {
           nombreBd: item.nombrebd,
           usuario: item.usuario,
           contrasena: item.contrasena,
-          fechaCreacion: item.fechaCreacion,
+          fechacreacion: item.fechacreacion,
           active: item.activo,
           idUsuario: item.idusuario,
         }))
@@ -241,7 +241,7 @@ export function DatabaseConnection() {
     init();
   }, []);
 
-  // Función para activar una configuración específica desde la tabla
+  // Función para aelctivar una configuración específica desde la tabla
   const handleActivate = async (id: number) => {
     try {
       const res = await fetch("http://localhost:3000/api/db-config/activate", {
@@ -249,6 +249,7 @@ export function DatabaseConnection() {
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({ Id: id }),
       });
 
@@ -290,12 +291,12 @@ export function DatabaseConnection() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          TipoBd: config.dbType,
-          Servidor: config.host,
-          Puerto: config.port,
-          NombreBd: config.database,
-          Usuario: config.username,
-          Contrasena: config.password,
+          tipobd: config.dbType,
+          servidor: config.host,
+          puerto: config.port,
+          nombrebd: config.database,
+          usuario: config.username,
+          contrasena: config.password,
         }),
       });
 
