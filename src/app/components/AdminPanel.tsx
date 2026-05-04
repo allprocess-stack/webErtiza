@@ -10,18 +10,19 @@ import {
   XCircle,
   UserPen,
   ShieldCheck,
+  CloudSnow,
 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
 interface User {
   id: number;
-  name: string;
-  lastname: string;
-  user: string;
+  nombre: string;
+  apellido: string;
+  usuario: string;
   rol: "ADMIN" | "WORKER" | "MASTER";
-  email: string;
-  password: string;
-  status: "active" | "inactive";
+  gmail: string;
+  contrasena: string;
+  activo: "active" | "inactive";
   lastLogin: string;
 }
 
@@ -31,17 +32,18 @@ export function AdminPanel() {
   // 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [configs, setConfig] = useState({
-    name: "",
-    lastname: "",
-    user: "",
+  const [config, setConfig] = useState({
+    nombre: "",
+    apellido: "",
+    usuario: "",
     rol: "",
     gmail: "",
-    password: "",
-    activeUser: false,
+    contrasena: "",
+    activoUsuario: false,
   });
   const canEditUser = (currentUserRole: string, targetRole: string) => {
     if (currentUserRole === "MASTER") return true;
@@ -51,8 +53,8 @@ export function AdminPanel() {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.gmail.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -63,13 +65,13 @@ export function AdminPanel() {
   const resetForm = () => {
     setEditingId(null);
     setConfig({
-      name: "",
-      lastname: "",
-      user: "",
+      nombre: "",
+      apellido: "",
+      usuario: "",
       rol: "",
       gmail: "",
-      password: "",
-      activeUser: false,
+      contrasena: "",
+      activoUsuario: false,
     });
   }
 
@@ -85,7 +87,7 @@ export function AdminPanel() {
       apellido: String(formData.get("apellido") || ""),
       gmail: String(formData.get("gmail") || ""),
       rol: String(formData.get("rol") || ""),
-      password: String(formData.get("password") || ""),
+      contrasena: String(formData.get("password") || ""),
       usuario: String(formData.get("usuario") || ""),
       activo: true,
     };
@@ -94,7 +96,7 @@ export function AdminPanel() {
       !newUser.apellido ||
       !newUser.usuario ||
       !newUser.gmail ||
-      !newUser.password
+      !newUser.contrasena
     ) {
       alert("Completa todos los campos");
       return;
@@ -123,23 +125,71 @@ export function AdminPanel() {
     }
   };
 
-  const handleEdit = (format: User) => {
-    // Llena el formulario con los datos de la fila
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingId) {
+      alert("No hay usuario seleccionado");
+      return;
+    }
+
+    if (
+      !config.nombre ||
+      !config.apellido ||
+      !config.usuario ||
+      !config.gmail
+    ) {
+      alert("Completa los campos obligatorios");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3000/usuarios/${editingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: config.nombre,
+          apellido: config.apellido,
+          usuario: config.usuario,
+          rol: config.rol,
+          gmail: config.gmail,
+          password: config.contrasena, // opcional (backend debería validar)
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Usuario actualizado correctamente");
+        setShowEditModal(false);
+        resetForm();
+        getAllUsers();
+      } else {
+        alert(data.error || "Error al actualizar");
+      }
+
+    } catch (error) {
+      console.error("Error update:", error);
+      alert("Error de conexión");
+    }
+  };
+
+  const handleEdit = (user: User) => {
+    console.log("USER:", user);
     setConfig({
-      name: format.name,
-      lastname: format.lastname,
-      user: format.user,
-      rol: format.rol,
-      gmail: format.email,
-      password: format.password,
-      activeUser: format.status === "active",
+      nombre: user.nombre,
+      apellido: user.apellido,
+      usuario: user.usuario,
+      rol: user.rol,
+      gmail: user.gmail,
+      contrasena: user.contrasena, // nunca cargues password real
+      activoUsuario: user.activo === "active",
     });
 
-    // Guarda el ID que estamos editando
-    setEditingId(format.id);
-
-    // Desbloquea el formulario por si estaba bloqueado
-    setIsLocked(false);
+    setEditingId(user.id);
+    setShowEditModal(true);
   };
 
   // Todos los usuarios (admin y worker) pueden ver la lista de usuarios
@@ -150,11 +200,13 @@ export function AdminPanel() {
 
       const mappedUsers = data.map((u: any) => ({
         id: u.id,
-        name: `${u.nombre} ${u.apellido}`,
-        email: u.gmail,
+        nombre: u.nombre,
+        apellido: u.apellido,
+        usuario: u.usuario,
+        gmail: u.gmail,
         rol: u.rol === "ADMIN" ? "ADMIN" : "WORKER",
-        status: u.activo ? "active" : "inactive",
-        lastLogin: "—",
+        activo: u.activo ? "active" : "inactive",
+        contrasena: u.contrasena,
       }));
 
       setUsers(mappedUsers);
@@ -189,7 +241,7 @@ export function AdminPanel() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // Activo: user?.status !== "active",
+          Activo: user?.activo ? "active" : "inactive",
         }),
       });
 
@@ -252,7 +304,7 @@ export function AdminPanel() {
             <div>
               <p className="text-sm text-slate-600">Usuarios Activos</p>
               <p className="text-2xl font-bold text-slate-800">
-                {users.filter((u) => u.status === "active").length}
+                {users.filter((u) => u.activo === "active").length}
               </p>
             </div>
             <CheckCircle className="w-8 h-8 text-emerald-600" />
@@ -308,8 +360,8 @@ export function AdminPanel() {
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="text-left px-6 py-4">
                     <div>
-                      <p className="font-medium text-slate-800">{user.name}</p>
-                      <p className="text-sm text-slate-500">{user.email}</p>
+                      <p className="font-medium text-slate-800">{user.nombre}</p>
+                      <p className="text-sm text-slate-500">{user.gmail}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -329,24 +381,24 @@ export function AdminPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <p
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === "active"
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${user.activo === "active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                         }`}
                     >
-                      {user.status === "active" ? (
+                      {user.activo === "active" ? (
                         <CheckCircle className="w-3 h-3" />
                       ) : (
                         <XCircle className="w-3 h-3" />
                       )}
-                      {user.status === "active" ? "Activo" : "Inactivo"}
+                      {user.activo === "active" ? "Activo" : "Inactivo"}
                     </p>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-2">
+                      <button className="p-2" onClick={() => activeUser}>
                         <ShieldCheck
-                          className={`w-6 h-6 ${canEdit(user.status)
+                          className={`w-6 h-6 ${canEdit(user.activo)
                             ? "text-green-600 hover:bg-green-50"
                             : "text-red-600 cursor-not-allowed"
                             }`}
@@ -465,6 +517,110 @@ export function AdminPanel() {
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">
+              Editar Usuario
+            </h2>
+            <form className="space-y-4" onSubmit={handleUpdateUser}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Nombres
+                </label>
+                <input
+                  type="text"
+                  name="nombre"
+                  value={config.nombre}
+                  onChange={(e) =>
+                    setConfig({ ...config, nombre: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nombre del usuario"
+                />
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Apellidos
+                </label>
+                <input
+                  name="apellido"
+                  type="text"
+                  value={config.apellido}
+                  onChange={(e) =>
+                    setConfig({ ...config, apellido: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Apellido del usuario"
+                />
+              </div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Usuario
+              </label>
+              <input
+                type="text"
+                name="usuario"
+                value={config.usuario}
+                onChange={(e) => setConfig({ ...config, usuario: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Usuario para iniciar sesión"
+              />
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Correo Electrónico
+                </label>
+                <input
+                  name="gmail"
+                  type="email"
+                  value={config.gmail}
+                  onChange={(e) => setConfig({ ...config, gmail: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="correo@empresa.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Rol
+                </label>
+                <select name="rol" value={config.rol} onChange={(e) => setConfig({ ...config, rol: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="WORKER" >Trabajador</option>
+                  {isMaster && (
+                    <><option value="ADMIN">Administrador</option><option value="MASTER">Master</option></>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Contraseña
+                </label>
+                <input
+                  name="password"
+                  type="password"
+                  value={config.contrasena}
+                  onChange={(e) => setConfig({ ...config, contrasena: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Contraseña"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Guardar
                 </button>
               </div>
             </form>

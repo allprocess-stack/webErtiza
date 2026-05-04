@@ -50,7 +50,7 @@ export function Login() {
       if (userData.rol === "MASTER" || userData.rol === "ADMIN") {
         navigate("/dashboard");
       } else {
-        navigate("/worker");
+        navigate("/");
       }
 
     } catch (error) {
