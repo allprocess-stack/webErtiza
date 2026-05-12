@@ -54,7 +54,7 @@ export function DatabaseConnection() {
   // Función para guardar una nueva configuración en la base de datos
   const handleSave = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/save-config", {
+      const res = await fetch( "/api/db-config/save-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +113,7 @@ export function DatabaseConnection() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/api/db-config/update-config/${editingId}`, {
+      const res = await fetch(` /api/db-config/update-config/${editingId}`, {
         method: "POST", // O PUT si tu backend lo prefiere
         headers: {
           "Content-Type": "application/json",
@@ -176,7 +176,7 @@ export function DatabaseConnection() {
   // Carga la configuración activa al iniciar la página
   const loadConfig = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/config");
+      const res = await fetch( "/api/db-config/config");
       const data = await res.json();
       if (data) {
         setConfig({
@@ -198,7 +198,7 @@ export function DatabaseConnection() {
   // Carga todas las configuraciones guardadas para mostrarlas en la tabla
   const loadAllConfigs = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/all-config");
+      const res = await fetch( "/api/db-config/all-config");
       const data = await res.json();
 
       setFormats(
@@ -225,7 +225,7 @@ export function DatabaseConnection() {
     const init = async () => {
       await loadAllConfigs();
 
-      const res = await fetch("http://localhost:3000/api/db-config/connection-status");
+      const res = await fetch( "/api/db-config/connection-status");
       const data = await res.json();
 
       if (data.connected) {
@@ -244,7 +244,7 @@ export function DatabaseConnection() {
   // Función para aelctivar una configuración específica desde la tabla
   const handleActivate = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/db-config/activate/${id}`, {
+      const res = await fetch(` /api/db-config/activate/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -269,7 +269,7 @@ export function DatabaseConnection() {
   const handleConnectionToggle = async () => {
     // DESCONECTAR
     if (connectionStatus === "connected") {
-      await fetch("http://localhost:3000/api/db-config/disconnect", {
+      await fetch( "/api/db-config/disconnect", {
         method: "POST",
       });
 
@@ -283,7 +283,7 @@ export function DatabaseConnection() {
     setConnectionStatus("testing");
 
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/test-dynamic", {
+      const res = await fetch( "/api/db-config/test-dynamic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

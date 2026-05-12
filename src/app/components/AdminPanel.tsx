@@ -102,7 +102,7 @@ export function AdminPanel() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:3000/api/admin/save-config", {
+      const res = await fetch( "/api/admin/save-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +144,7 @@ export function AdminPanel() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/usuarios/${editingId}`, {
+      const res = await fetch(` /usuarios/${editingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +195,7 @@ export function AdminPanel() {
   // Todos los usuarios (admin y worker) pueden ver la lista de usuarios
   const getAllUsers = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/admin/all-config");
+      const res = await fetch( "/api/admin/all-config");
       const data = await res.json();
 
       const mappedUsers = data.map((u: any) => ({
@@ -220,7 +220,7 @@ export function AdminPanel() {
     if (!confirm("¿Eliminar usuario?")) return;
 
     try {
-      await fetch(`http://localhost:3000/api/admin/delete-config/${id}`, {
+      await fetch(` /api/admin/delete-config/${id}`, {
         method: "DELETE",
       });
 
@@ -235,7 +235,7 @@ export function AdminPanel() {
     // const user = users.find(u => u.id === id);
 
     try {
-      await fetch(`http://localhost:3000/api/admin/activate-config/${id}`, {
+      await fetch(` /api/admin/activate-config/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
