@@ -1,118 +1,169 @@
 import { useEffect, useState } from "react";
-import { FileText, Save, Plus, Trash2, Check, Upload, RefreshCw } from "lucide-react";
+import { FileText, Save, Plus, Trash2, Check, Edit, Power, PowerOff } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
-interface PrefixFormat {
+interface TicketConfig {
   id: number;
-  format: string;
-  prefix: string;
-  fechaCreacion?: string;
-  active: boolean;
-  idusuario?: number;
+  prefijo: string;
+  formato: string;
+  fechacreacion?: string;
+  activo: boolean;
+  idusuario?: number | null;
 }
 
 export function TicketPrefixConfig() {
   const { user } = useAuth();
 
-  const [formats, setFormats] = useState<PrefixFormat[]>([]);
-  const [newFormat, setFormat] = useState({
-    // name: "",
-    prefix: "",
-    format: "",
-    active: false,
+  const [tickets, setTickets] = useState<TicketConfig[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  
+  const [newTicket, setNewTicket] = useState({
+    prefijo: "",
+    formato: "0000",
   });
+
   useEffect(() => {
-    loadConfig();
-    loadFormats();
+    loadTickets();
   }, []);
+
+  // Cargar todos los tickets
+  const loadTickets = async () => {
+    try {
+      const res = await fetch(`/api/ticket-prefix-config/all-configs`);
+      const data = await res.json();
+      
+      if (Array.isArray(data)) {
+        // Mapear los campos del backend a nuestra interfaz
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          prefijo: item.prefijo,
+          formato: item.formato,
+          fechacreacion: item.fechacreacion,
+          activo: item.activo,
+          idusuario: item.idusuario,
+        }));
+        setTickets(mapped);
+      }
+    } catch (error) {
+      console.error("Error al cargar tickets:", error);
+      alert("Error al cargar configuraciones");
+    }
+  };
+
+  // Generar ejemplo de ticket
+  const generateExample = (prefijo: string, formato: string) => {
+    const correlativo = formato.replace(/0/g, "1");
+    return `${prefijo}-${correlativo}`;
+  };
+
+  // Guardar o actualizar ticket
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/ticket-prefix/save-config",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            Prefijo: newFormat.prefix,
-            Formato: newFormat.format,
-            Activo: false,
-            IdUsuario: user?.id || null,
-          }),
-        });
-      // const data = await res.json();
-      if (res.ok) {
-        alert("Configuración guardada correctamente");
-        await loadConfig()
-        await loadFormats();
-      } else {
-        alert("Error al guardar");
+      // Validar campos requeridos
+      if (!newTicket.prefijo || !newTicket.formato) {
+        alert("Prefijo y formato son requeridos");
+        return;
       }
-    } catch (error) {
-      alert("Error de conexión con el backend");
-    }
-  }
 
-  const loadConfig = async () => {
-    try {
-      const res = await fetch("/api/ticket-prefix/config");
-      const data = await res.json();
-      if (data) {
-        setFormat({
-          // name: data. || "",
-          prefix: data.Prefijo || "",
-          format: data.Formato || "",
-          active: false,
-        });
-      }
-    } catch (error) {
-      alert("Error de conexión con el backend");
-    }
-  }
+      const endpoint = isEditing && editingId
+        ? `/api/ticket-prefix-config/update-config/${editingId}`
+        : `/api/ticket-prefix-config/save-config`;
+      
+      const method = isEditing ? "PUT" : "POST";
 
-  const generateExample = (prefix: string, format: string) => {
-    const correlativo = format.replace(/0/g, "1");
-    return `${prefix}-${correlativo}`;
-  };
-
-  const loadFormats = async () => {
-    try {
-      const res = await fetch("/api/ticket-prefix/all-config");
-      const data = await res.json();
-
-      const mapped = data.map((item: any) => ({
-        id: item.Id,
-        name: "Formato Ticket",
-        prefix: item.Prefijo,
-        format: item.Formato,
-        example: generateExample(item.Prefijo, item.Formato),
-        active: item.Activo,
-      }));
-
-      setFormats(mapped);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const activeTicket = async (id: number) => {
-    try {
-      const res = await fetch("/api/ticket-prefix/activate-config", {
-        method: "PUT",
+      const res = await fetch(endpoint, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ Id: id }),
+        body: JSON.stringify({
+          prefijo: newTicket.prefijo.toUpperCase(),
+          formato: newTicket.formato,
+          fechacreacion: new Date().toISOString(),
+          activo: false, // Por defecto inactivo
+          idusuario: user?.id || null,
+        }),
       });
 
+      const data = await res.json();
+      
       if (res.ok) {
-        await loadConfig();
+        alert(data.message || (isEditing ? "Ticket actualizado correctamente" : "Ticket creado correctamente"));
+        await loadTickets();
+        resetForm();
       } else {
-        alert("Error al activar");
+        alert(data.error || "Error al guardar");
       }
     } catch (error) {
-      alert("Error de conexión");
+      alert("Error de conexión con el backend");
     }
+  };
+
+  // Activar/Desactivar ticket
+  const toggleActive = async (id: number, activo: boolean) => {
+    try {
+      const res = await fetch(`/api/ticket-prefix-config/activate-config/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ activo: !activo }),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert(data.message || `Ticket ${!activo ? 'activado' : 'desactivado'} correctamente`);
+        await loadTickets();
+      } else {
+        alert(data.error || "Error al cambiar estado");
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  };
+
+  // Editar ticket
+  const handleEdit = (ticket: TicketConfig) => {
+    setNewTicket({
+      prefijo: ticket.prefijo,
+      formato: ticket.formato,
+    });
+    setIsEditing(true);
+    setEditingId(ticket.id);
+  };
+
+  // Eliminar ticket
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Está seguro de eliminar este ticket?")) return;
+
+    try {
+      const res = await fetch(`/api/ticket-prefix-config/delete-ticket/${id}`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert(data.message || "Ticket eliminado correctamente");
+        await loadTickets();
+      } else {
+        alert(data.error || "Error al eliminar");
+      }
+    } catch (error) {
+      alert("Error de conexión con el backend");
+    }
+  };
+
+  // Resetear formulario
+  const resetForm = () => {
+    setNewTicket({
+      prefijo: "",
+      formato: "0000",
+    });
+    setIsEditing(false);
+    setEditingId(null);
   };
 
   return (
@@ -127,42 +178,27 @@ export function TicketPrefixConfig() {
         </p>
       </div>
 
-      {/* Add New Format */}
+      {/* Add/Edit Format */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
         <h2 className="text-lg font-bold text-slate-800 mb-4">
-          Agregar Nuevo Formato
+          {isEditing ? "Editar Formato" : "Agregar Nuevo Formato"}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Nombre del Formato
-            </label>
-            <input
-              type="text"
-              value={newFormat.name}
-              onChange={(e) =>
-                setFormat({ ...newFormat, name: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: Formato Entrada"
-            />
-          </div> */}
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Prefijo
             </label>
             <input
               type="text"
-              value={newFormat.prefix}
+              value={newTicket.prefijo}
               onChange={(e) =>
-                setFormat({
-                  ...newFormat,
-                  prefix: e.target.value.toUpperCase(),
+                setNewTicket({
+                  ...newTicket,
+                  prefijo: e.target.value.toUpperCase(),
                 })
               }
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="ENT, SAL, DSP"
+              placeholder="Ej: ENT, SAL, DSP"
               maxLength={5}
             />
           </div>
@@ -172,9 +208,9 @@ export function TicketPrefixConfig() {
               Formato
             </label>
             <select
-              value={newFormat.format}
+              value={newTicket.formato}
               onChange={(e) =>
-                setFormat({ ...newFormat, format: e.target.value })
+                setNewTicket({ ...newTicket, formato: e.target.value })
               }
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -185,11 +221,33 @@ export function TicketPrefixConfig() {
             </select>
           </div>
         </div>
-        <button className="mt-4 flex bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          onClick={handleSave}>
-          <Plus className="w-5 h-5" />
-          Agregar Formato
-        </button>
+
+        {/* Vista previa */}
+        {newTicket.prefijo && newTicket.formato && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Ejemplo:</strong> {generateExample(newTicket.prefijo, newTicket.formato)}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Save className="w-5 h-5" />
+            {isEditing ? "Actualizar Formato" : "Guardar Formato"}
+          </button>
+          {isEditing && (
+            <button
+              onClick={resetForm}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Format Variables Guide */}
@@ -200,7 +258,7 @@ export function TicketPrefixConfig() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
             <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{PREFIX}"}
+              {"{PREFIJO}"}
             </code>
             <div>
               <p className="font-medium text-slate-800">Prefijo</p>
@@ -212,19 +270,21 @@ export function TicketPrefixConfig() {
 
           <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
             <code className="text-sm font-mono bg-slate-200 px-2 py-1 rounded">
-              {"{NNNNNN}"}
+              {"{FORMATO}"}
             </code>
             <div>
               <p className="font-medium text-slate-800">
-                Formato Digitos
+                Formato de Dígitos
               </p>
-              <p className="text-sm text-slate-600">Ejemplo: 0000001</p>
+              <p className="text-sm text-slate-600">
+                Cantidad de ceros para el correlativo
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Existing Formats */}
+      {/* Existing Formats Table */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200">
         <div className="p-6 border-b border-slate-200">
           <h2 className="text-xl font-bold text-slate-800">
@@ -236,7 +296,7 @@ export function TicketPrefixConfig() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
-                  Nombre
+                  ID
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Prefijo
@@ -248,6 +308,9 @@ export function TicketPrefixConfig() {
                   Ejemplo
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
+                  Fecha Creación
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase">
                   Estado
                 </th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase">
@@ -256,49 +319,92 @@ export function TicketPrefixConfig() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {formats.map((format) => (
-                <tr key={format.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 font-medium text-slate-800">
-                    {format.id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded text-sm font-mono">
-                      {format.prefix}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4">
-                    <code className="text-xs text-slate-600 font-mono">
-                      {format.format}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4 font-mono text-sm text-slate-800">
-                    {format.fechaCreacion}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${format.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-700"
-                        }`}
-                    >
-                      {format.active ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" onClick={() => activeTicket(format.id)}>
-                        <Check className="w-5 h-5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" />
-                      </button>
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <RefreshCw className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
+              {tickets.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
+                    No hay formatos configurados
                   </td>
                 </tr>
-              ))}
+              ) : (
+                tickets.map((ticket) => (
+                  <tr key={ticket.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {ticket.id}
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded text-sm font-mono">
+                        {ticket.prefijo}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="text-sm text-slate-600 font-mono">
+                        {ticket.formato}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="text-sm text-blue-600 font-mono bg-blue-50 px-2 py-1 rounded">
+                        {generateExample(ticket.prefijo, ticket.formato)}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">
+                      {ticket.fechacreacion 
+                        ? new Date(ticket.fechacreacion).toLocaleDateString() 
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+                          ticket.activo
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {ticket.activo ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Botón Activar/Desactivar */}
+                        {ticket.activo ? (
+                          <button
+                            onClick={() => toggleActive(ticket.id, ticket.activo)}
+                            className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                            title="Desactivar"
+                          >
+                            <PowerOff className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => toggleActive(ticket.id, ticket.activo)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Activar"
+                          >
+                            <Power className="w-4 h-4" />
+                          </button>
+                        )}
+                        
+                        {/* Botón Editar */}
+                        <button
+                          onClick={() => handleEdit(ticket)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        
+                        {/* Botón Eliminar */}
+                        <button
+                          onClick={() => handleDelete(ticket.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
