@@ -42,7 +42,7 @@ export function AdminPanel() {
     usuario: "",
     rol: "",
     gmail: "",
-    contrasena: "",
+    password: "",
     activoUsuario: false,
   });
   const canEditUser = (currentUserRole: string, targetRole: string) => {
@@ -70,7 +70,7 @@ export function AdminPanel() {
       usuario: "",
       rol: "",
       gmail: "",
-      contrasena: "",
+      password: "",
       activoUsuario: false,
     });
   }
@@ -87,7 +87,7 @@ export function AdminPanel() {
       apellido: String(formData.get("apellido") || ""),
       gmail: String(formData.get("gmail") || ""),
       rol: String(formData.get("rol") || ""),
-      contrasena: String(formData.get("password") || ""),
+      password: String(formData.get("password") || ""),
       usuario: String(formData.get("usuario") || ""),
       activo: true,
     };
@@ -96,7 +96,7 @@ export function AdminPanel() {
       !newUser.apellido ||
       !newUser.usuario ||
       !newUser.gmail ||
-      !newUser.contrasena
+      !newUser.password
     ) {
       alert("Completa todos los campos");
       return;
@@ -155,7 +155,7 @@ export function AdminPanel() {
           usuario: config.usuario,
           rol: config.rol,
           gmail: config.gmail,
-          password: config.contrasena, // opcional (backend debería validar)
+          password: config.password, // opcional (backend debería validar)
         }),
       });
 
@@ -184,7 +184,7 @@ export function AdminPanel() {
       usuario: user.usuario,
       rol: user.rol,
       gmail: user.gmail,
-      contrasena: user.contrasena, // nunca cargues password real
+      password: user.contrasena, // nunca cargues password real
       activoUsuario: user.activo === "active",
     });
 
@@ -602,8 +602,8 @@ export function AdminPanel() {
                 <input
                   name="password"
                   type="password"
-                  value={config.contrasena}
-                  onChange={(e) => setConfig({ ...config, contrasena: e.target.value })}
+                  value={config.password}
+                  onChange={(e) => setConfig({ ...config, password: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Contraseña"
                 />

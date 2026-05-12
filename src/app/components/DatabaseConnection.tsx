@@ -66,7 +66,7 @@ export function DatabaseConnection() {
           nombrebd: config.database,
           usuario: config.username,
           contrasena: config.password,
-          idusuario: user.nombre === "root" ? null : 1, // luego lo haces dinámico
+          idusuario: user.rol === "MASTER" ? null : user.id, // luego lo haces dinámico
           activo: true,
         }),
       });
@@ -244,13 +244,11 @@ export function DatabaseConnection() {
   // Función para aelctivar una configuración específica desde la tabla
   const handleActivate = async (id: number) => {
     try {
-      const res = await fetch("http://localhost:3000/api/db-config/activate", {
+      const res = await fetch(`http://localhost:3000/api/db-config/activate/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-
-        body: JSON.stringify({ Id: id }),
       });
 
       const data = await res.json();
@@ -607,16 +605,25 @@ export function DatabaseConnection() {
                     {format.idUsuario === null ? "MASTER" : format.idUsuario}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${format.active ? "bg-green-100 text-green-700" : "bg-gray-100"}`}>
-                      {format.active ? "Activo" : "Inactivo"}
-                    </span>
+                    <span
+  className={`px-2 py-1 rounded text-xs ${
+    format.active ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+  }`}
+>
+  {format.active ? "Activo" : "Inactivo"}
+</span>
+
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       {/* botones */}
-                      <button onClick={() => handleActivate(format.id)} className="text-green-500 hover:text-green-700">
-                        <CircleCheck className="w-6 h-6" />
-                      </button>
+                      <button
+  onClick={() => handleActivate(format.id)}
+  className={format.active ? "text-green-500 hover:text-green-700" : "text-blue-500 hover:text-blue-700"}
+>
+  <CircleCheck className="w-6 h-6" />
+</button>
+
                       <button
                         onClick={() => handleEdit(format)} // Pasamos todo el objeto de la fila
                         className="text-blue-500 hover:text-blue-700"
