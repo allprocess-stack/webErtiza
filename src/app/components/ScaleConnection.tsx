@@ -81,7 +81,7 @@ export function ScaleConnection() {
       const endpoint = isEditing && selectedConfig
         ? `/api/scale-config/update-config/${selectedConfig.id}`
         : `/api/scale-config/save-config`;
-      
+
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(endpoint, {
@@ -100,7 +100,7 @@ export function ScaleConnection() {
       });
 
       const data = await res.json();
-      
+
       if (data.success) {
         alert(data.message || (isEditing ? "Configuración actualizada correctamente" : "Configuración guardada correctamente"));
         await loadConfiguraciones();
@@ -128,7 +128,7 @@ export function ScaleConnection() {
       });
 
       const data = await res.json();
-      
+
       if (data.success || data.succcess) {
         alert(data.message || "Configuración activada correctamente");
         await loadConfiguraciones();
@@ -152,7 +152,7 @@ export function ScaleConnection() {
       });
 
       const data = await res.json();
-      
+
       if (data.success || data.succcess) {
         alert(data.message || "Configuración desactivada correctamente");
         await loadConfiguraciones();
@@ -185,7 +185,7 @@ export function ScaleConnection() {
       });
 
       const data = await res.json();
-      
+
       if (data.success) {
         alert(data.message || "Configuración eliminada correctamente");
         await loadConfiguraciones();
@@ -209,11 +209,11 @@ export function ScaleConnection() {
   const handleConnectionToggle = async () => {
     if (connectionStatus === "connected") {
       try {
-        const res = await fetch(`/api/scale-config/disconnect`, { 
-          method: "POST" 
+        const res = await fetch(`/api/scale-config/disconnect`, {
+          method: "POST"
         });
         const data = await res.json();
-        
+
         if (data.success) {
           setConnectionStatus("disconnected");
           setIsLocked(false);
@@ -240,7 +240,7 @@ export function ScaleConnection() {
       });
 
       const data = await res.json();
-      
+
       if (data.success) {
         // Probar conexión exitosa, ahora conectar
         const connectRes = await fetch(`/api/scale-config/connect`, {
@@ -253,9 +253,9 @@ export function ScaleConnection() {
             puerto: parseInt(config.puerto),
           }),
         });
-        
+
         const connectData = await connectRes.json();
-        
+
         if (connectData.success) {
           setConnectionStatus("connected");
           setIsLocked(true);
@@ -292,13 +292,12 @@ export function ScaleConnection() {
 
       {/* Status Card */}
       <div
-        className={`rounded-xl p-6 mb-6 ${
-          connectionStatus === "connected"
-            ? "bg-green-50 border-2 border-green-200"
-            : connectionStatus === "connecting"
+        className={`rounded-xl p-6 mb-6 ${connectionStatus === "connected"
+          ? "bg-green-50 border-2 border-green-200"
+          : connectionStatus === "connecting"
             ? "bg-yellow-50 border-2 border-yellow-200"
             : "bg-red-50 border-2 border-red-200"
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -315,8 +314,8 @@ export function ScaleConnection() {
                 {connectionStatus === "connected"
                   ? "Conectado"
                   : connectionStatus === "connecting"
-                  ? "Conectando..."
-                  : "Desconectado"}
+                    ? "Conectando..."
+                    : "Desconectado"}
               </p>
               <p className="text-sm text-slate-600">
                 {connectionStatus === "connected"
@@ -369,17 +368,16 @@ export function ScaleConnection() {
                     <td className="px-4 py-3 text-sm text-slate-700">{configuracion.ip || "-"}</td>
                     <td className="px-4 py-3 text-sm text-slate-700">{configuracion.puerto || "-"}</td>
                     <td className="px-4 py-3 text-sm text-slate-700">
-                      {configuracion.fechacreacion 
-                        ? new Date(configuracion.fechacreacion).toLocaleDateString() 
+                      {configuracion.fechacreacion
+                        ? new Date(configuracion.fechacreacion).toLocaleDateString()
                         : "-"}
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          configuracion.activo
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${configuracion.activo
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {configuracion.activo ? "Activo" : "Inactivo"}
                       </span>
@@ -442,7 +440,7 @@ export function ScaleConnection() {
               </label>
               <input
                 type="text"
-                disabled={isLocked}
+                disabled={isLocked && !isEditing}
                 value={config.ip}
                 onChange={(e) => setConfig({ ...config, ip: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -456,7 +454,7 @@ export function ScaleConnection() {
               </label>
               <input
                 type="number"
-                disabled={isLocked}
+                disabled={isLocked && !isEditing}
                 value={config.puerto}
                 onChange={(e) => setConfig({ ...config, puerto: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -473,15 +471,13 @@ export function ScaleConnection() {
               <Save className="w-5 h-5" />
               {isEditing ? "Actualizar" : "Guardar"}
             </button>
-            {!isEditing && (
-              <button
-                onClick={handleConnectionToggle}
-                className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <RefreshCw className="w-5 h-5" />
-                Probar y Conectar
-              </button>
-            )}
+            <button
+              onClick={handleConnectionToggle}
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <RefreshCw className="w-5 h-5" />
+              {isEditing ? "Probar Conexión" : "Probar y Conectar"}
+            </button>
             <button
               onClick={() => {
                 setShowForm(false);
@@ -500,9 +496,13 @@ export function ScaleConnection() {
       {/* Info Card */}
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <strong>Nota:</strong> Solo una configuración puede estar activa a la vez.
-          Asegúrese de que la balanza esté encendida y conectada a la misma red.
-          Verifique que el firewall permita conexiones en el puerto configurado.
+          <strong>Nota:</strong>
+          <ul>
+            <li>* Solo una configuración puede estar activa a la vez.
+              Asegúrese de que la balanza esté encendida y conectada a la misma red.
+              Verifique que el firewall permita conexiones en el puerto configurado.</li>
+            <li>* Para editar una configuracion esta debe estar activa.</li>
+          </ul>
         </p>
       </div>
     </div>
